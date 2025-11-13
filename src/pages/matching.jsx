@@ -51,7 +51,7 @@ const currentUserPrefs = {
     interests: ["music", "travel", "sports"]
 };
 
-export function Matching() {
+export default function Matching() {
     const filteredMatches = filtering(allUsers, currentUserPrefs);
 
 return (
