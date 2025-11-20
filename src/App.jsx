@@ -1,4 +1,4 @@
-import { useState } from "react";
+// import { useState } from "react";
 import Home from "./pages/home";
 import Header from "./components/header";
 import Chat from "./pages/chat";
@@ -7,6 +7,8 @@ function App() {
     <>
      <div className="h-screen"> <Header />
       <Chat /></div>
+      {/* <Home /> */}
+      <Auth />
     </>
   );
 }
