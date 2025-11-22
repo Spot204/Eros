@@ -1,6 +1,6 @@
 import React from 'react'
 import Header from '../components/header.jsx'
-import SwipeCard from '../components/SwipeCard.jsx'
+
 import Chat from './chat.jsx'
 
 const home = () => {

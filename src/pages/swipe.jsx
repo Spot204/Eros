@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import SwipeCard from "../components/SwipeCard";
+import SwipeCard from "../components/swipeCard";
 import mockUsers from "../assets/mockUsers";
 import UserDetailModal from "../components/UserDetailModal";
 
