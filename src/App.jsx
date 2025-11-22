@@ -5,9 +5,11 @@ import Chat from "./pages/chat";
 function App() {
   return (
     <>
-     <div className="h-screen"> <Header />
-      <Chat /></div>
-      {/* <Home /> */}
+      <div className="h-screen">
+        <Header />
+        <Chat />
+      </div>
+
       <Auth />
     </>
   );
