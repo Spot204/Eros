@@ -1,11 +1,15 @@
 // import { useState } from "react";
 import Home from "./pages/home";
-import Auth from "./pages/auth";
-
+import Header from "./components/header";
+import Chat from "./pages/chat";
 function App() {
   return (
     <>
-      {/* <Home /> */}
+      <div className="h-screen">
+        <Header />
+        <Chat />
+      </div>
+
       <Auth />
     </>
   );

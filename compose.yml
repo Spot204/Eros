@@ -1,0 +1,26 @@
+# docker-compose.yml  (đặt ngay ngoài cùng)
+version: '3.8'
+
+services:
+  postgres:
+    image: postgis/postgis:15-3.4-alpine
+    container_name: tinder-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: tinder
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql   # Tự động tạo bảng
+
+  redis:
+    image: redis:7-alpine
+    container_name: tinder-redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:
