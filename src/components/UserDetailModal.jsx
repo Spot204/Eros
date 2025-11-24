@@ -42,10 +42,8 @@ export default function UserDetailModal({ user, onClose, onBlock, onReport }) {
                         ))}
                     </div>
                 </div>
-
                 {/* Actions */}
                 <div className="flex justify-between mt-8 gap-4">
-
                     {/* Nút Chặn */}
                     <button
                         onClick={() => onBlock(user.id)}
@@ -54,11 +52,9 @@ export default function UserDetailModal({ user, onClose, onBlock, onReport }) {
                             bg-pink-100 text-pink-600 font-semibold 
                             shadow-sm hover:bg-pink-200 
                             transition-all
-                        "
-                    >
+                        ">
                         Chặn
                     </button>
-
                     {/* Nút Báo cáo */}
                     <button
                         onClick={() => onReport(user.id)}
@@ -72,7 +68,6 @@ export default function UserDetailModal({ user, onClose, onBlock, onReport }) {
                     >
                         Báo cáo
                     </button>
-
                 </div>
             </div>
         </div>
