@@ -6,7 +6,7 @@ const Auth = () => {
     <div className="auth-page">
       <header className="auth-header">
         <div className="auth-logo">Eros</div>
-          <button className="btn primary login-btn"> Đăng nhập</button>
+          <Button className="btn primary login-btn"> Đăng nhập</Button>
       </header>
 
       <main className="auth-hero">

@@ -116,6 +116,9 @@
 .btn.primary {
 	background: linear-gradient(90deg,#ff4d7e,#ff6a9b);
 	color: #fff;
+	height: 46px;
+	font-size: 18px;
+	font-weight: 650;
 }
 
 .btn.ghost {
