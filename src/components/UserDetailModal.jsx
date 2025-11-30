@@ -55,6 +55,7 @@ export default function UserDetailModal({ user, onClose, onBlock, onReport }) {
                         ">
                         Chặn
                     </button>
+
                     {/* Nút Báo cáo */}
                     <button
                         onClick={() => onReport(user.id)}
