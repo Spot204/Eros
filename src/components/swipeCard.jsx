@@ -77,3 +77,4 @@ const SwipeCard = forwardRef(({ user, zIndex, onSwipe, onShowDetail }, ref) => {
 });
 
 export default SwipeCard;
+
