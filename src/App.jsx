@@ -11,7 +11,7 @@ function App() {
     <>
       <Router>
         <Routes>
-          <Route path="/" element={<Auth />} />
+          <Route path="/" element={<> <Header/><Swipe/></>} />
           <Route path="/home" element={<> <Header/><Swipe/></>} />
           <Route path="/chat" element={<> <Header/><Chat/></>} />
         </Routes>
