@@ -13,7 +13,7 @@ export default function Swipe() {
   };
 
   return (
-    <div className="flex flex-col items-center w-full h-[90vh] pt-8 bg-white">
+    <div className="flex flex-col items-center w-full mt-20 bg-white">
       <div className="relative w-[350px] h-[520px]">
         {users.map((user, index) => (
           <SwipeCard

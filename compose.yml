@@ -4,10 +4,10 @@ version: '3.8'
 services:
   postgres:
     image: postgis/postgis:15-3.4-alpine
-    container_name: tinder-postgres
+    container_name: eors-postgres
     restart: always
     environment:
-      POSTGRES_DB: tinder
+      POSTGRES_DB: eors
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123456
     ports:
@@ -18,7 +18,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: tinder-redis
+    container_name: eors-redis
     ports:
       - "6379:6379"
 
