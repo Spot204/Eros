@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
     email           VARCHAR(255) UNIQUE NOT NULL,
     password_hash   VARCHAR(255) NOT NULL,
     gender          VARCHAR(20),
-    birth_date      DATE NOT NULL,
+    birth_date      DATE,
     is_active       BOOLEAN DEFAULT TRUE,
     is_verified     BOOLEAN DEFAULT FALSE,
     created_at      TIMESTAMP DEFAULT NOW(),
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS preferences (
     updated_at          TIMESTAMP DEFAULT NOW()
 );
 
--- 5. Interests (sở thích)
+-- 5. Interests (sở thích)  
 CREATE TABLE IF NOT EXISTS interests (
     interest_id     BIGSERIAL PRIMARY KEY,
     user_id         BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
