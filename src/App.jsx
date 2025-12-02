@@ -37,9 +37,7 @@ function App() {
         <Route
           path="/Preferences"
           element={
-            <MainLayout>
-              <Swipe />
-            </MainLayout>
+            <Preferences/>
           }
         />
         <Route
