@@ -3,27 +3,26 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 
 -- 1. Users
 CREATE TABLE IF NOT EXISTS users (
-    user_id         BIGSERIAL PRIMARY KEY,
-    username        VARCHAR(50)  UNIQUE NOT NULL,
-    email           VARCHAR(255) UNIQUE NOT NULL,
-    password_hash   VARCHAR(255) NOT NULL,
-    gender          VARCHAR(20),
-    birth_date      DATE,
-    is_active       BOOLEAN DEFAULT TRUE,
-    is_verified     BOOLEAN DEFAULT FALSE,
-    created_at      TIMESTAMP DEFAULT NOW(),
-    updated_at      TIMESTAMP DEFAULT NOW()
+    user_id         BIGSERIAL PRIMARY KEY,
+    username        VARCHAR(50)  UNIQUE NOT NULL,
+    email           VARCHAR(255) UNIQUE NOT NULL,
+    password_hash   VARCHAR(255) NOT NULL
 );
 
 -- 2. Profiles + vị trí (PostGIS)
 CREATE TABLE IF NOT EXISTS profiles (
-    user_id         BIGINT PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
-    bio             TEXT,
-    job_title       VARCHAR(100),
-    company         VARCHAR(100),
-    education       VARCHAR(150),
-    location        GEOGRAPHY(POINT, 4326),
-    updated_at      TIMESTAMP DEFAULT NOW()
+    user_id         BIGINT PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
+    bio             TEXT,
+    job_title       VARCHAR(100),
+    company         VARCHAR(100),
+    education       VARCHAR(150),
+    location        GEOGRAPHY(POINT, 4326),
+    gender          VARCHAR(20),
+    birth_date      DATE NOT NULL,
+    is_active       BOOLEAN DEFAULT TRUE,
+    is_verified     BOOLEAN DEFAULT FALSE,
+    created_at      TIMESTAMP DEFAULT NOW(),
+    updated_at      TIMESTAMP DEFAULT NOW()
 );
 CREATE INDEX idx_profiles_location ON profiles USING GIST(location);
 
@@ -47,39 +46,31 @@ CREATE TABLE IF NOT EXISTS preferences (
     updated_at          TIMESTAMP DEFAULT NOW()
 );
 
--- 5. Interests (Đã được chuẩn hóa thành 2 bảng Many-to-Many) 🚀
-----------------------------------------------------------------------
--- 5.1 Bảng danh sách sở thích chuẩn (Từ điển/Master List)
--- Chứa tất cả sở thích có trên hệ thống, đảm bảo không trùng lặp.
-CREATE TABLE IF NOT EXISTS master_interests (
-    interest_id     SERIAL PRIMARY KEY,
-    name            VARCHAR(50) UNIQUE NOT NULL, -- Tên sở thích chuẩn hóa
-    category        VARCHAR(30) DEFAULT 'other', -- Phân loại mềm (sport, tech, food)
-    emoji           VARCHAR(10),                 -- Icon hiển thị
-    created_at      TIMESTAMP DEFAULT NOW()
+-- 5. Interests (sở thích) – ĐÚNG THỨ TỰ + ĐÚNG CÚ PHÁP
+CREATE TABLE IF NOT EXISTS interest_map (
+    interest_id     BIGSERIAL PRIMARY KEY,
+    interest_tag    VARCHAR(100) UNIQUE NOT NULL
 );
 
--- 5.2 Bảng liên kết User - Sở thích (User chọn cái gì)
--- Lưu mối quan hệ giữa User và các Interest đã được chuẩn hóa (dựa trên interest_id).
 CREATE TABLE IF NOT EXISTS user_interests (
-    user_id         BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-    interest_id     INT NOT NULL REFERENCES master_interests(interest_id) ON DELETE CASCADE,
-    added_at        TIMESTAMP DEFAULT NOW(),
-    PRIMARY KEY (user_id, interest_id) -- User không thể chọn 1 sở thích 2 lần
+    user_interest_id BIGSERIAL PRIMARY KEY,
+    user_id          BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    interest_id      BIGINT NOT NULL REFERENCES interest_map(interest_id),
+    UNIQUE(user_id, interest_id)
 );
 ----------------------------------------------------------------------
 
--- 6. Swipes (vuốt trái/phải)
+-- 6. Swipes
 CREATE TABLE IF NOT EXISTS swipes (
-    swipe_id        BIGSERIAL PRIMARY KEY,
-    from_user_id    BIGINT NOT NULL REFERENCES users(user_id),
-    to_user_id      BIGINT NOT NULL REFERENCES users(user_id),
-    action          VARCHAR(10) NOT NULL CHECK (action IN ('LIKE', 'PASS')),
-    created_at      TIMESTAMP DEFAULT NOW(),
-    UNIQUE(from_user_id, to_user_id)
+    swipe_id        BIGSERIAL PRIMARY KEY,
+    from_user_id    BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    to_user_id      BIGINT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    action          VARCHAR(10) NOT NULL CHECK (action IN ('LIKE', 'PASS')),
+    created_at      TIMESTAMP DEFAULT NOW(),
+    UNIQUE(from_user_id, to_user_id)
 );
 
--- 7. Matches ← ID này chính là ID phòng chat luôn!
+-- 7. Matches
 CREATE TABLE IF NOT EXISTS matches (
     match_id        BIGSERIAL PRIMARY KEY,
     user1_id        BIGINT NOT NULL REFERENCES users(user_id),
@@ -88,7 +79,7 @@ CREATE TABLE IF NOT EXISTS matches (
     UNIQUE(user1_id, user2_id)
 );
 
--- 8. Messages (real-time chat)
+-- 8. Messages
 CREATE TABLE IF NOT EXISTS messages (
     message_id      BIGSERIAL PRIMARY KEY,
     match_id        BIGINT NOT NULL REFERENCES matches(match_id) ON DELETE CASCADE,
