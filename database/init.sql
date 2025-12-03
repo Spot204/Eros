@@ -1,4 +1,3 @@
--- database/init.sql  ← COPY-PASTE 100% LÀ CHẠY NGON
 CREATE EXTENSION IF NOT EXISTS postgis;
 
 -- 1. Users
