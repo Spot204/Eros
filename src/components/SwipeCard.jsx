@@ -69,7 +69,7 @@ const SwipeCard = forwardRef(({ user, zIndex, onSwipe, onShowDetail }, ref) => {
     >
       {/* ► Ảnh chính */}
       <img
-        src={user.avatar || "/default-avatar.png"}
+        src={user.photos?.[0] || "https://via.placeholder.com/400"}
         alt={user.name}
         className="w-full h-full object-cover"
       />
