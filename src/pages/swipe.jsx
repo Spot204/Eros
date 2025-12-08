@@ -1,15 +1,45 @@
-import { useState, useRef } from "react";
-import SwipeCard from "../components/swipeCard";
-import mockUsers from "../assets/mockUsers";
+import { useState, useRef, useEffect } from "react";
+import SwipeCard from "../components/SwipeCard";
 import UserDetailModal from "../components/UserDetailModal";
+import axios from "axios";
 
 export default function Swipe() {
-  const [users, setUsers] = useState(mockUsers);
+  const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const topCardRef = useRef(null);
 
-  const handleSwipe = (id, direction) => {
-    setUsers(prev => prev.filter(u => u.id !== id));
+  const CURRENT_USER = 1; // TODO: lấy từ login sau này
+
+  // ⭐ Load danh sách gợi ý từ backend
+  const fetchUsers = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8080/recommend/${CURRENT_USER}`
+      );
+      setUsers(res.data);
+    } catch (err) {
+      console.error("Load users failed", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  // ⭐ Gửi swipe lên backend
+  const handleSwipe = async (toUserId, direction) => {
+    try {
+      await axios.post("http://localhost:8080/swipe", {
+        fromUser: CURRENT_USER,
+        toUser: toUserId,
+        action: direction === "right" ? "LIKE" : "PASS",
+      });
+    } catch (err) {
+      console.error("Swipe failed", err);
+    }
+
+    // Xóa user khỏi UI
+    setUsers((prev) => prev.filter((u) => u.id !== toUserId));
   };
 
   return (
@@ -22,7 +52,7 @@ export default function Swipe() {
             zIndex={users.length - index}
             onSwipe={handleSwipe}
             onShowDetail={() => setSelectedUser(user)}
-            ref={index === 0 ? topCardRef : null} // <-- ref top card
+            ref={index === 0 ? topCardRef : null}
           />
         ))}
       </div>
@@ -48,7 +78,7 @@ export default function Swipe() {
           user={selectedUser}
           onClose={() => setSelectedUser(null)}
           onBlock={(id) => {
-            setUsers(prev => prev.filter(u => u.id !== id));
+            setUsers((prev) => prev.filter((u) => u.id !== id));
             setSelectedUser(null);
           }}
           onReport={(id) => {
