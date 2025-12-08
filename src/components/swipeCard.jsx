@@ -7,43 +7,50 @@ const SwipeCard = forwardRef(({ user, zIndex, onSwipe, onShowDetail }, ref) => {
 
   const [buttonSwipe, setButtonSwipe] = useState(null); // 'left' | 'right'
 
-  // Vuốt tay
+  // Drag start
   const handleStart = (e) => {
-    if (buttonSwipe) return; // đang swipe nút → khóa drag
+    if (buttonSwipe) return;
     setIsDragging(true);
     const touch = e.touches ? e.touches[0] : e;
     setStartPos({ x: touch.clientX, y: touch.clientY });
   };
 
+  // Drag move
   const handleMove = (e) => {
     if (!isDragging || buttonSwipe) return;
     const touch = e.touches ? e.touches[0] : e;
-    setPosition({ x: touch.clientX - startPos.x, y: touch.clientY - startPos.y });
+    setPosition({
+      x: touch.clientX - startPos.x,
+      y: touch.clientY - startPos.y,
+    });
   };
 
+  // Drag end
   const handleEnd = () => {
     if (buttonSwipe) return;
     setIsDragging(false);
+
     if (position.x > 120) triggerSwipe("right");
     else if (position.x < -120) triggerSwipe("left");
     else setPosition({ x: 0, y: 0 });
   };
 
-  // Vuốt bằng nút
+  // Button swipe
   const triggerSwipe = (direction) => {
     setButtonSwipe(direction);
+
     setTimeout(() => {
       onSwipe(user.id, direction);
     }, 300);
   };
 
-  // Expose phương thức swipeLeft / swipeRight
+  // Expose swipeLeft/swipeRight to parent
   useImperativeHandle(ref, () => ({
     swipeLeft: () => triggerSwipe("left"),
     swipeRight: () => triggerSwipe("right"),
   }));
 
-  // Transform style
+  // Animation transform
   let transformStyle = `translate(${position.x}px, ${position.y}px) rotate(${position.x / 10}deg)`;
   if (buttonSwipe === "left") transformStyle = "translateX(-200px) rotate(-12deg)";
   if (buttonSwipe === "right") transformStyle = "translateX(200px) rotate(12deg)";
@@ -60,9 +67,19 @@ const SwipeCard = forwardRef(({ user, zIndex, onSwipe, onShowDetail }, ref) => {
       onTouchMove={handleMove}
       onTouchEnd={handleEnd}
     >
-      <img src={user.photo} alt={user.name} className="w-full h-full object-cover" />
+      {/* ► Ảnh chính */}
+      <img
+        src={user.avatar || "/default-avatar.png"}
+        alt={user.name}
+        className="w-full h-full object-cover"
+      />
+
+      {/* Info overlay */}
       <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/60 to-transparent text-white">
-        <h2 className="text-xl font-semibold">{user.name}, {user.age}</h2>
+        <h2 className="text-xl font-semibold">
+          {user.name}, {user.age}
+        </h2>
+
         <p className="text-white/80 text-sm">{user.bio}</p>
 
         <button
@@ -77,4 +94,3 @@ const SwipeCard = forwardRef(({ user, zIndex, onSwipe, onShowDetail }, ref) => {
 });
 
 export default SwipeCard;
-
