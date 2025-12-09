@@ -1,95 +1,6 @@
 import { useState, useEffect } from "react";
 import { Save, AlertCircle } from "lucide-react"; 
 
-// --- DỮ LIỆU MẪU (MOCK DATA) --- 
-// Đã đồng bộ 100% với file init.sql
-const MOCK_CATEGORIES = [
-  {
-    category_id: 1, category_name: 'Creativity', icon: '🎨',
-    items: [
-      { interest_id: 1, interest_tag: 'Art', icon: '🎨' },
-      { interest_id: 2, interest_tag: 'Crafts', icon: '🧶' },
-      { interest_id: 3, interest_tag: 'Dancing', icon: '💃' },
-      { interest_id: 4, interest_tag: 'Design', icon: '✏️' },
-      { interest_id: 5, interest_tag: 'Make-up', icon: '💄' },
-      { interest_id: 6, interest_tag: 'Making videos', icon: '📹' },
-      { interest_id: 7, interest_tag: 'Photography', icon: '📷' },
-      { interest_id: 8, interest_tag: 'Singing', icon: '🎤' },
-      { interest_id: 9, interest_tag: 'Writing', icon: '📝' },
-    ]
-  },
-  {
-    category_id: 2, category_name: 'Sports', icon: '⚽',
-    items: [
-      { interest_id: 10, interest_tag: 'Athletics', icon: '🎽' },
-      { interest_id: 11, interest_tag: 'Badminton', icon: '🏸' },
-      { interest_id: 12, interest_tag: 'Baseball', icon: '⚾' },
-      { interest_id: 13, interest_tag: 'Basketball', icon: '🏀' },
-      { interest_id: 14, interest_tag: 'Bouldering', icon: '🧗' },
-      { interest_id: 15, interest_tag: 'Bowling', icon: '🎳' },
-      { interest_id: 16, interest_tag: 'Boxing', icon: '🥊' },
-      { interest_id: 17, interest_tag: 'Crew', icon: '🚣' },
-      { interest_id: 18, interest_tag: 'Football', icon: '⚽' },
-      { interest_id: 19, interest_tag: 'Gym', icon: '💪' },
-      { interest_id: 20, interest_tag: 'Yoga', icon: '🧘' },
-    ]
-  },
-  {
-    category_id: 3, category_name: 'Going Out', icon: '🍻',
-    items: [
-      { interest_id: 21, interest_tag: 'Bars', icon: '🍻' },
-      { interest_id: 22, interest_tag: 'Cafe-hopping', icon: '☕' },
-      { interest_id: 23, interest_tag: 'Clubs', icon: '🕺' },
-      { interest_id: 24, interest_tag: 'Concerts', icon: '🎫' },
-      { interest_id: 25, interest_tag: 'Festivals', icon: '🎉' },
-      { interest_id: 26, interest_tag: 'Karaoke', icon: '🎤' },
-      { interest_id: 27, interest_tag: 'Museums & galleries', icon: '🏛️' },
-      { interest_id: 28, interest_tag: 'Stand up', icon: '🎙️' },
-      { interest_id: 29, interest_tag: 'Theater', icon: '🎭' },
-    ]
-  },
-  {
-    category_id: 4, category_name: 'Music', icon: '🎵',
-    items: [
-      { interest_id: 30, interest_tag: 'Pop', icon: '🎤' },
-      { interest_id: 31, interest_tag: 'Rock', icon: '🎸' },
-      { interest_id: 32, interest_tag: 'Hip Hop', icon: '🎧' },
-      { interest_id: 33, interest_tag: 'Indie', icon: '🎹' },
-      { interest_id: 34, interest_tag: 'K-Pop', icon: '🇰🇷' },
-      { interest_id: 35, interest_tag: 'EDM', icon: '🎛️' },
-    ]
-  },
-  {
-    category_id: 5, category_name: 'Food & Drink', icon: '🍕',
-    items: [
-      { interest_id: 36, interest_tag: 'Sushi', icon: '🍣' },
-      { interest_id: 37, interest_tag: 'Vegan', icon: '🥗' },
-      { interest_id: 38, interest_tag: 'Coffee', icon: '☕' },
-      { interest_id: 39, interest_tag: 'Bubble Tea', icon: '🧋' },
-      { interest_id: 40, interest_tag: 'Pizza', icon: '🍕' },
-      { interest_id: 41, interest_tag: 'Street Food', icon: '🍢' },
-    ]
-  },
-  {
-    category_id: 6, category_name: 'Tech', icon: '💻',
-    items: [
-      { interest_id: 42, interest_tag: 'Coding', icon: '💻' },
-      { interest_id: 43, interest_tag: 'Gaming', icon: '🎮' },
-      { interest_id: 44, interest_tag: 'Crypto', icon: '💰' },
-      { interest_id: 45, interest_tag: 'AI', icon: '🤖' },
-      { interest_id: 46, interest_tag: 'Startups', icon: '🚀' },
-    ]
-  },
-  {
-    // Pets & Traveling có trong bảng Categories nhưng chưa có Items trong đoạn SQL bạn gửi
-    // Tôi vẫn để đây để hiển thị Category, sau này bạn insert thêm item vào SQL thì nó hiện ra
-    category_id: 7, category_name: 'Pets', icon: '🐶', items: []
-  },
-  {
-    category_id: 8, category_name: 'Traveling', icon: '✈️', items: []
-  }
-];
-
 export default function Preferences() {
   const [prefs, setPrefs] = useState({
     interested_in: "everyone",
@@ -98,7 +9,7 @@ export default function Preferences() {
     max_distance_km: 50,
   });
 
-  // State lưu danh sách Category (Mock Data)
+  // State lưu danh sách Category lấy từ Server
   const [categories, setCategories] = useState([]); 
   
   // State lưu các ID sở thích đã chọn
@@ -109,11 +20,48 @@ export default function Preferences() {
 
   // --- 1. Load dữ liệu khi vào trang ---
   useEffect(() => {
-    // Load Mock Data
-    setCategories(MOCK_CATEGORIES);
-    
-    // Demo: Giả sử User này đã chọn trước "Art" (ID 1) và "Gym" (ID 19)
-    // setSelectedIds([1, 19]); 
+    const fetchData = async () => {
+        try {
+            const userId = 1; // Mặc định user 1
+
+            // Gọi song song 2 API để tiết kiệm thời gian
+            const [metaRes, profileRes] = await Promise.all([
+                fetch('http://localhost:4000/api/metadata/interests'), // Lấy Menu sở thích
+                fetch(`http://localhost:4000/api/profile/${userId}`)   // Lấy cài đặt cũ của User
+            ]);
+
+            const metaData = await metaRes.json();
+            const userData = await profileRes.json();
+
+            // 1. Cập nhật Menu Categories
+            if (Array.isArray(metaData)) {
+                setCategories(metaData);
+            }
+
+            // 2. Điền dữ liệu cũ vào Form (nếu có)
+            if (userData.profile) {
+                // Merge dữ liệu preferences từ server vào state
+                setPrefs(prev => ({
+                    ...prev,
+                    interested_in: userData.profile.interested_in || "everyone",
+                    age_min: userData.profile.age_min || 18,
+                    age_max: userData.profile.age_max || 35,
+                    max_distance_km: userData.profile.max_distance_km || 50
+                }));
+            }
+
+            // 3. Highlight các sở thích đã chọn
+            if (userData.selectedInterestIds) {
+                setSelectedIds(userData.selectedInterestIds);
+            }
+
+        } catch (error) {
+            console.error("Lỗi tải dữ liệu:", error);
+            setMessage({ type: "error", text: "Không thể kết nối tới Server Backend!" });
+        }
+    };
+
+    fetchData();
   }, []);
 
   // --- Handlers ---
@@ -141,6 +89,7 @@ export default function Preferences() {
     });
   };
 
+  // --- Gửi dữ liệu về Backend ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -154,19 +103,35 @@ export default function Preferences() {
     }
 
     try {
-      // const userId = 1; // Lấy từ Auth Context
-      
-      console.log("Submitting Data:", { ...prefs, selectedIds });
-      
-      // Giả lập thành công
-      setTimeout(() => {
-          setMessage({ type: "success", text: "Cập nhật thành công!" });
-          setLoading(false);
-      }, 1000);
+      const userId = 1; 
 
+      // Gọi API song song: Lưu Prefs và Lưu Interests cùng lúc
+      const [prefRes, intRes] = await Promise.all([
+        // Request 1: Preferences
+        fetch("http://localhost:4000/api/profile/preferences", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, ...prefs }),
+        }),
+        // Request 2: Interests (Chỉ gửi mảng ID)
+        fetch("http://localhost:4000/api/profile/interests", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, interest_ids: selectedIds }), 
+        })
+      ]);
+
+      if (!prefRes.ok || !intRes.ok) {
+        throw new Error("Lỗi khi lưu dữ liệu.");
+      }
+
+      // Thành công
+      setMessage({ type: "success", text: "Đã lưu cài đặt thành công!" });
+      
     } catch (err) {
       console.error(err);
-      setMessage({ type: "error", text: "Có lỗi xảy ra." });
+      setMessage({ type: "error", text: "Có lỗi xảy ra, vui lòng thử lại." });
+    } finally {
       setLoading(false);
     }
   };
@@ -236,7 +201,7 @@ export default function Preferences() {
                 </div>
             </div>
 
-            {/* --- PHẦN 2: INTERESTS (Tinder Style) --- */}
+            {/* --- PHẦN 2: INTERESTS (Load từ Backend) --- */}
             <div>
               <div className="flex justify-between items-end mb-4">
                   <label className="block text-lg font-bold text-gray-800">Interests</label>
@@ -244,16 +209,17 @@ export default function Preferences() {
               </div>
               
               <div className="space-y-6">
+                {/* Kiểm tra nếu categories chưa tải xong hoặc rỗng */}
+                {categories.length === 0 && <p className="text-center text-gray-400">Loading interests...</p>}
+
                 {categories.map((cat) => (
-                  // Chỉ hiển thị category nếu có items bên trong (ẩn Pets/Traveling nếu rỗng)
-                  cat.items.length > 0 && (
+                  // Backend trả về mảng items, cần check null/undefined
+                  cat.items && cat.items.length > 0 && (
                     <div key={cat.category_id}>
-                      {/* Tiêu đề nhóm */}
                       <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
                           <span>{cat.icon}</span> {cat.category_name}
                       </h3>
                       
-                      {/* Danh sách Pills */}
                       <div className="flex flex-wrap gap-2">
                           {cat.items.map((item) => {
                               const isSelected = selectedIds.includes(item.interest_id);
@@ -265,12 +231,11 @@ export default function Preferences() {
                                       className={`
                                           px-3 py-1.5 rounded-full text-sm font-medium border transition-all flex items-center gap-1.5
                                           ${isSelected 
-                                              ? "bg-white border-pink-500 text-pink-600 shadow-sm ring-1 ring-pink-500" // Đã chọn
-                                              : "bg-white border-gray-300 text-gray-600 hover:border-pink-300 hover:bg-gray-50" // Chưa chọn
+                                              ? "bg-white border-pink-500 text-pink-600 shadow-sm ring-1 ring-pink-500" 
+                                              : "bg-white border-gray-300 text-gray-600 hover:border-pink-300 hover:bg-gray-50"
                                           }
                                       `}
                                   >
-                                      {/* Icon riêng của từng Tag */}
                                       <span>{item.icon}</span>
                                       {item.interest_tag}
                                   </button>

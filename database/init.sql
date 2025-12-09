@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS interest_categories (
 CREATE TABLE IF NOT EXISTS interest_map (
     interest_id     SERIAL PRIMARY KEY,
     interest_tag    VARCHAR(50) NOT NULL,
-    icon            VARCHAR(20), -- Icon của từng sở thích con (QUAN TRỌNG)
+    icon            VARCHAR(20), -- Icon của từng sở thích con
     category_id     INT REFERENCES interest_categories(category_id) ON DELETE CASCADE,
     UNIQUE(interest_tag, category_id)
 );
@@ -119,123 +119,154 @@ CREATE TABLE IF NOT EXISTS messages (
 CREATE INDEX idx_messages_match ON messages(match_id, sent_at);
 
 -- --------------------------------------------------------
--- 3. SEED DATA (Dữ liệu mẫu chuẩn Tinder)
+-- 3. SEED DATA (Dữ liệu mẫu - Đã Việt hóa & Bổ sung đầy đủ)
 -- --------------------------------------------------------
 
--- 3.1 Nạp Categories
+-- 3.1 Nạp Categories (Tiếng Việt)
 INSERT INTO interest_categories (category_name, icon) 
 VALUES 
-    ('Creativity', '🎨'),
-    ('Sports', '⚽'),
-    ('Going Out', '🍻'),
-    ('Music', '🎵'),
-    ('Food & Drink', '🍕'),
-    ('Traveling', '✈️'),
-    ('Tech', '💻'),
-    ('Pets', '🐶')
+    ('Sáng tạo', '🎨'),
+    ('Thể thao', '⚽'),
+    ('Giải trí', '🍻'),
+    ('Âm nhạc', '🎵'),
+    ('Ẩm thực', '🍕'),
+    ('Du lịch', '✈️'),
+    ('Công nghệ', '💻'),
+    ('Thú cưng', '🐶')
 ON CONFLICT (category_name) DO NOTHING;
 
--- 3.2 Nạp Interests chi tiết (Kèm Icon cho từng cái)
+-- 3.2 Nạp Interests chi tiết (Tiếng Việt + Icon)
 
--- === CREATIVITY ===
+-- === SÁNG TẠO ===
 INSERT INTO interest_map (interest_tag, icon, category_id)
 SELECT t.tag, t.icon, c.category_id 
 FROM interest_categories c
 CROSS JOIN (VALUES 
-    ('Art', '🎨'), 
-    ('Crafts', '🧶'), 
-    ('Dancing', '💃'), 
-    ('Design', '✏️'), 
-    ('Make-up', '💄'), 
-    ('Making videos', '📹'), 
-    ('Photography', '📷'), 
-    ('Singing', '🎤'), 
-    ('Writing', '📝')
+    ('Nghệ thuật', '🎨'), 
+    ('Thủ công', '🧶'), 
+    ('Nhảy múa', '💃'), 
+    ('Thiết kế', '✏️'), 
+    ('Trang điểm', '💄'), 
+    ('Quay video', '📹'), 
+    ('Nhiếp ảnh', '📷'), 
+    ('Ca hát', '🎤'), 
+    ('Viết lách', '📝')
 ) AS t(tag, icon)
-WHERE c.category_name = 'Creativity'
+WHERE c.category_name = 'Sáng tạo'
 ON CONFLICT DO NOTHING;
 
--- === SPORTS ===
+-- === THỂ THAO ===
 INSERT INTO interest_map (interest_tag, icon, category_id)
 SELECT t.tag, t.icon, c.category_id 
 FROM interest_categories c
 CROSS JOIN (VALUES 
-    ('Athletics', '🎽'), 
-    ('Badminton', '🏸'), 
-    ('Baseball', '⚾'), 
-    ('Basketball', '🏀'), 
-    ('Bouldering', '🧗'), 
+    ('Điền kinh', '🎽'), 
+    ('Cầu lông', '🏸'), 
+    ('Bóng chày', '⚾'), 
+    ('Bóng rổ', '🏀'), 
+    ('Leo núi', '🧗'), 
     ('Bowling', '🎳'), 
-    ('Boxing', '🥊'), 
-    ('Crew', '🚣'),
-    ('Football', '⚽'), 
-    ('Gym', '💪'),
+    ('Quyền anh', '🥊'), 
+    ('Chèo thuyền', '🚣'),
+    ('Bóng đá', '⚽'), 
+    ('Tập Gym', '💪'),
     ('Yoga', '🧘')
 ) AS t(tag, icon)
-WHERE c.category_name = 'Sports'
+WHERE c.category_name = 'Thể thao'
 ON CONFLICT DO NOTHING;
 
--- === GOING OUT ===
+-- === GIẢI TRÍ ===
 INSERT INTO interest_map (interest_tag, icon, category_id)
 SELECT t.tag, t.icon, c.category_id 
 FROM interest_categories c
 CROSS JOIN (VALUES 
-    ('Bars', '🍻'), 
-    ('Cafe-hopping', '☕'), 
-    ('Clubs', '🕺'), 
-    ('Concerts', '🎫'), 
-    ('Festivals', '🎉'), 
+    ('Quán Bar', '🍻'), 
+    ('Đi Cà phê', '☕'), 
+    ('Vũ trường', '🕺'), 
+    ('Hòa nhạc', '🎫'), 
+    ('Lễ hội', '🎉'), 
     ('Karaoke', '🎤'), 
-    ('Museums & galleries', '🏛️'), 
-    ('Stand up', '🎙️'), 
-    ('Theater', '🎭')
+    ('Bảo tàng', '🏛️'), 
+    ('Hài độc thoại', '🎙️'), 
+    ('Xem kịch', '🎭')
 ) AS t(tag, icon)
-WHERE c.category_name = 'Going Out'
+WHERE c.category_name = 'Giải trí'
 ON CONFLICT DO NOTHING;
 
--- === MUSIC ===
+-- === ÂM NHẠC ===
 INSERT INTO interest_map (interest_tag, icon, category_id)
 SELECT t.tag, t.icon, c.category_id 
 FROM interest_categories c
 CROSS JOIN (VALUES 
-    ('Pop', '🎤'), 
-    ('Rock', '🎸'), 
+    ('Nhạc Pop', '🎤'), 
+    ('Nhạc Rock', '🎸'), 
     ('Hip Hop', '🎧'), 
-    ('Indie', '🎹'), 
+    ('Nhạc Indie', '🎹'), 
     ('K-Pop', '🇰🇷'),
     ('EDM', '🎛️')
 ) AS t(tag, icon)
-WHERE c.category_name = 'Music' 
+WHERE c.category_name = 'Âm nhạc' 
 ON CONFLICT DO NOTHING;
 
--- === FOOD & DRINK ===
+-- === ẨM THỰC ===
 INSERT INTO interest_map (interest_tag, icon, category_id)
 SELECT t.tag, t.icon, c.category_id 
 FROM interest_categories c
 CROSS JOIN (VALUES 
     ('Sushi', '🍣'), 
-    ('Vegan', '🥗'), 
-    ('Coffee', '☕'), 
-    ('Bubble Tea', '🧋'), 
+    ('Đồ chay', '🥗'), 
+    ('Cà phê', '☕'), 
+    ('Trà sữa', '🧋'), 
     ('Pizza', '🍕'), 
-    ('Street Food', '🍢')
+    ('Ẩm thực đường phố', '🍢')
 ) AS t(tag, icon)
-WHERE c.category_name = 'Food & Drink' 
+WHERE c.category_name = 'Ẩm thực' 
 ON CONFLICT DO NOTHING;
 
--- === TECH ===
+-- === CÔNG NGHỆ ===
 INSERT INTO interest_map (interest_tag, icon, category_id)
 SELECT t.tag, t.icon, c.category_id 
 FROM interest_categories c
 CROSS JOIN (VALUES 
-    ('Coding', '💻'), 
-    ('Gaming', '🎮'), 
-    ('Crypto', '💰'), 
-    ('AI', '🤖'), 
-    ('Startups', '🚀')
+    ('Lập trình', '💻'), 
+    ('Chơi game', '🎮'), 
+    ('Tiền ảo/Crypto', '💰'), 
+    ('Trí tuệ nhân tạo (AI)', '🤖'), 
+    ('Khởi nghiệp', '🚀')
 ) AS t(tag, icon)
-WHERE c.category_name = 'Tech' 
+WHERE c.category_name = 'Công nghệ' 
 ON CONFLICT DO NOTHING;
+
+-- === THÚ CƯNG (Mới bổ sung) ===
+INSERT INTO interest_map (interest_tag, icon, category_id)
+SELECT t.tag, t.icon, c.category_id 
+FROM interest_categories c
+CROSS JOIN (VALUES 
+    ('Yêu Chó', '🐶'), 
+    ('Yêu Mèo', '🐱'), 
+    ('Chim cảnh', '🐦'), 
+    ('Cá cảnh', '🐠'), 
+    ('Hamster', '🐹'),
+    ('Bò sát', '🦎')
+) AS t(tag, icon)
+WHERE c.category_name = 'Thú cưng' 
+ON CONFLICT DO NOTHING;
+
+-- === DU LỊCH (Mới bổ sung) ===
+INSERT INTO interest_map (interest_tag, icon, category_id)
+SELECT t.tag, t.icon, c.category_id 
+FROM interest_categories c
+CROSS JOIN (VALUES 
+    ('Phượt', '🎒'), 
+    ('Cắm trại', '⛺'), 
+    ('Đi biển', '🏖️'), 
+    ('Leo núi', '⛰️'), 
+    ('Road trips', '🚗'),
+    ('Khám phá', '🗺️')
+) AS t(tag, icon)
+WHERE c.category_name = 'Du lịch' 
+ON CONFLICT DO NOTHING;
+
 -- Thêm User Mặc định (ID sẽ là 1) để test không cần đăng nhập
 INSERT INTO users (username, email, password_hash) 
 VALUES ('test_user', 'test@gmail.com', 'dummy_hash')
