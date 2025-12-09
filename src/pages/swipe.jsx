@@ -12,35 +12,36 @@ export default function Swipe() {
   const currentUserId = 1; // tạm
 
   // ---- LOAD GỢI Ý ----
-  const loadRecommendations = async () => {
+  const loadNextUser = async () => {
     try {
-      const res = await fetch(`http://localhost:8005/recommend/${currentUserId}`);
+      const res = await fetch("http://localhost:8005/api/matches/next");
       const data = await res.json();
-      setUsers(data);
+
+      // API trả về 1 user → convert thành array để .map()
+      setUsers(data ? [data] : []);
     } catch (err) {
-      console.error("Error loading recommendations:", err);
+      console.error("Error loading next user:", err);
     }
   };
 
   useEffect(() => {
-    loadRecommendations();
+    loadNextUser();
   }, []);
 
   // ---- GỬI API SWIPE ----
   const handleSwipe = async (targetId, direction) => {
-    console.log("Swipe:", direction, "→", targetId);
-
-    await fetch("http://localhost:8005/swipe", {
+    await fetch("http://localhost:8005/api/matches/swipe", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        swiperId: currentUserId,
+        userId: currentUserId,
         targetId,
         direction,
       }),
     });
 
-    setActiveIndex((prev) => prev + 1);
+    // Sau khi swipe → load tiếp người tiếp theo
+    loadNextUser();
   };
 
   // ---- CLICK BUTTON SWIPE ----
