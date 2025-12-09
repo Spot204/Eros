@@ -7,7 +7,6 @@ CREATE TABLE IF NOT EXISTS users (
     email           VARCHAR(255) UNIQUE NOT NULL,
     password_hash   VARCHAR(255) NOT NULL
 );
-
 -- 2. Profiles + vị trí (PostGIS)
 CREATE TABLE IF NOT EXISTS profiles (
     user_id         BIGINT PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
@@ -57,7 +56,6 @@ CREATE TABLE IF NOT EXISTS user_interests (
     interest_id      BIGINT NOT NULL REFERENCES interest_map(interest_id),
     UNIQUE(user_id, interest_id)
 );
-
 -- 6. Swipes
 CREATE TABLE IF NOT EXISTS swipes (
     swipe_id        BIGSERIAL PRIMARY KEY,
