@@ -14,33 +14,30 @@ export default function Swipe() {
   // ---- LOAD GỢI Ý ----
   const loadNextUser = async () => {
     try {
-      const res = await fetch("http://localhost:8005/api/matches/next");
+      const res = await fetch(`http://localhost:8005/api/matches/next?user_id=${currentUserId}`);
       const data = await res.json();
 
-      // API trả về 1 user → convert thành array để .map()
-      setUsers(data ? [data] : []);
+      setUsers(data || []);
     } catch (err) {
       console.error("Error loading next user:", err);
     }
   };
 
-  useEffect(() => {
-    loadNextUser();
-  }, []);
-
-  // ---- GỬI API SWIPE ----
   const handleSwipe = async (targetId, direction) => {
-    await fetch("http://localhost:8005/api/matches/swipe", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId: currentUserId,
-        targetId,
-        direction,
-      }),
-    });
+    try {
+      await fetch("http://localhost:8005/api/matches/swipe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fromUser: currentUserId,
+          toUser: targetId,
+          action: direction === "right" ? "LIKE" : "NOPE",
+        }),
+      });
+    } catch (err) {
+      console.error("SWIPE ERROR:", err);
+    }
 
-    // Sau khi swipe → load tiếp người tiếp theo
     loadNextUser();
   };
 
