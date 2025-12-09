@@ -1,91 +1,102 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import SwipeCard from "../components/SwipeCard";
 import UserDetailModal from "../components/UserDetailModal";
-import axios from "axios";
 
 export default function Swipe() {
   const [users, setUsers] = useState([]);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [selectedUser, setSelectedUser] = useState(null);
-  const topCardRef = useRef(null);
 
-  const CURRENT_USER = 1; // TODO: lấy từ login sau này
+  const cardRefs = useRef([]);
 
-  // ⭐ Load danh sách gợi ý từ backend
-  const fetchUsers = async () => {
+  const currentUserId = 1; // tạm
+
+  // ---- LOAD GỢI Ý ----
+  const loadRecommendations = async () => {
     try {
-      const res = await axios.get(
-        `http://localhost:8080/recommend/${CURRENT_USER}`
-      );
-      setUsers(res.data);
+      const res = await fetch(`http://localhost:8005/recommend/${currentUserId}`);
+      const data = await res.json();
+      setUsers(data);
     } catch (err) {
-      console.error("Load users failed", err);
+      console.error("Error loading recommendations:", err);
     }
   };
 
   useEffect(() => {
-    fetchUsers();
+    loadRecommendations();
   }, []);
 
-  // ⭐ Gửi swipe lên backend
-  const handleSwipe = async (toUserId, direction) => {
-    try {
-      await axios.post("http://localhost:8080/swipe", {
-        fromUser: CURRENT_USER,
-        toUser: toUserId,
-        action: direction === "right" ? "LIKE" : "PASS",
-      });
-    } catch (err) {
-      console.error("Swipe failed", err);
-    }
+  // ---- GỬI API SWIPE ----
+  const handleSwipe = async (targetId, direction) => {
+    console.log("Swipe:", direction, "→", targetId);
 
-    // Xóa user khỏi UI
-    setUsers((prev) => prev.filter((u) => u.id !== toUserId));
+    await fetch("http://localhost:8005/swipe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        swiperId: currentUserId,
+        targetId,
+        direction,
+      }),
+    });
+
+    setActiveIndex((prev) => prev + 1);
   };
 
-  return (
-    <div className="flex flex-col items-center w-full mt-20 bg-white">
-      <div className="relative w-[350px] h-[520px]">
-        {users.map((user, index) => (
-          <SwipeCard
-            key={user.id}
-            user={user}
-            zIndex={users.length - index}
-            onSwipe={handleSwipe}
-            onShowDetail={() => setSelectedUser(user)}
-            ref={index === 0 ? topCardRef : null}
-          />
-        ))}
-      </div>
+  // ---- CLICK BUTTON SWIPE ----
+  const swipeLeft = () => {
+    if (cardRefs.current[0]) cardRefs.current[0].swipeLeft();
+  };
 
-      <div className="flex gap-6 mt-6">
+  const swipeRight = () => {
+    if (cardRefs.current[0]) cardRefs.current[0].swipeRight();
+  };
+
+  // ---- MODAL ----
+  const openDetail = (user) => setSelectedUser(user);
+  const closeDetail = () => setSelectedUser(null);
+
+  return (
+    <div className="flex items-center justify-center h-screen bg-gray-100 relative">
+
+      {/* ------ STACK SWIPE CARDS ------ */}
+      {users.length > 0 &&
+        users
+          .slice(activeIndex, activeIndex + 3)
+          .map((user, i) => (
+            <SwipeCard
+              key={user.id}
+              user={user}
+              zIndex={100 - i}
+              onSwipe={handleSwipe}
+              onShowDetail={() => openDetail(user)}
+              ref={(el) => (cardRefs.current[i] = el)}
+            />
+          ))}
+
+      {/* ------ NÚT SWIPE ------ */}
+      <div className="absolute bottom-10 flex gap-12">
+        
+        {/* Nút X – Swipe Left */}
         <button
-          onClick={() => topCardRef.current?.swipeLeft()}
-          className="w-12 h-12 bg-white rounded-full shadow-md border flex items-center justify-center hover:scale-110 transition"
+          onClick={swipeLeft}
+          className="w-16 h-16 rounded-full bg-white shadow-md flex items-center justify-center text-red-500 text-3xl active:scale-90 transition"
         >
-          ❌
+          ✖
         </button>
 
+        {/* Nút Heart – Swipe Right */}
         <button
-          onClick={() => topCardRef.current?.swipeRight()}
-          className="w-12 h-12 bg-white rounded-full shadow-md border flex items-center justify-center hover:scale-110 transition"
+          onClick={swipeRight}
+          className="w-16 h-16 rounded-full bg-white shadow-md flex items-center justify-center text-pink-500 text-3xl active:scale-90 transition"
         >
           ❤️
         </button>
       </div>
 
+      {/* ----- MODAL ----- */}
       {selectedUser && (
-        <UserDetailModal
-          user={selectedUser}
-          onClose={() => setSelectedUser(null)}
-          onBlock={(id) => {
-            setUsers((prev) => prev.filter((u) => u.id !== id));
-            setSelectedUser(null);
-          }}
-          onReport={(id) => {
-            console.log("Reported user", id);
-            setSelectedUser(null);
-          }}
-        />
+        <UserDetailModal user={selectedUser} onClose={closeDetail} />
       )}
     </div>
   );
