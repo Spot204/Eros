@@ -1,392 +1,303 @@
-// src/pages/EditProfile.jsx
-import React, { useState } from "react";
-import { X, Plus, Heart } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Save, AlertCircle } from "lucide-react"; 
 
-export default function EditProfile() {
-  const [formData, setFormData] = useState({
-    username: "johndoe",
-    email: "john@example.com",
-    gender: "Male",
-    birthDate: "1990-05-15",
-    bio: "Adventure seeker and coffee lover",
-    jobTitle: "Product Designer",
-    company: "Tech Corp",
-    education: "Bachelor's in Design",
-    location: "San Francisco, CA",
+// --- DỮ LIỆU MẪU (MOCK DATA) --- 
+// Đã đồng bộ 100% với file init.sql
+const MOCK_CATEGORIES = [
+  {
+    category_id: 1, category_name: 'Creativity', icon: '🎨',
+    items: [
+      { interest_id: 1, interest_tag: 'Art', icon: '🎨' },
+      { interest_id: 2, interest_tag: 'Crafts', icon: '🧶' },
+      { interest_id: 3, interest_tag: 'Dancing', icon: '💃' },
+      { interest_id: 4, interest_tag: 'Design', icon: '✏️' },
+      { interest_id: 5, interest_tag: 'Make-up', icon: '💄' },
+      { interest_id: 6, interest_tag: 'Making videos', icon: '📹' },
+      { interest_id: 7, interest_tag: 'Photography', icon: '📷' },
+      { interest_id: 8, interest_tag: 'Singing', icon: '🎤' },
+      { interest_id: 9, interest_tag: 'Writing', icon: '📝' },
+    ]
+  },
+  {
+    category_id: 2, category_name: 'Sports', icon: '⚽',
+    items: [
+      { interest_id: 10, interest_tag: 'Athletics', icon: '🎽' },
+      { interest_id: 11, interest_tag: 'Badminton', icon: '🏸' },
+      { interest_id: 12, interest_tag: 'Baseball', icon: '⚾' },
+      { interest_id: 13, interest_tag: 'Basketball', icon: '🏀' },
+      { interest_id: 14, interest_tag: 'Bouldering', icon: '🧗' },
+      { interest_id: 15, interest_tag: 'Bowling', icon: '🎳' },
+      { interest_id: 16, interest_tag: 'Boxing', icon: '🥊' },
+      { interest_id: 17, interest_tag: 'Crew', icon: '🚣' },
+      { interest_id: 18, interest_tag: 'Football', icon: '⚽' },
+      { interest_id: 19, interest_tag: 'Gym', icon: '💪' },
+      { interest_id: 20, interest_tag: 'Yoga', icon: '🧘' },
+    ]
+  },
+  {
+    category_id: 3, category_name: 'Going Out', icon: '🍻',
+    items: [
+      { interest_id: 21, interest_tag: 'Bars', icon: '🍻' },
+      { interest_id: 22, interest_tag: 'Cafe-hopping', icon: '☕' },
+      { interest_id: 23, interest_tag: 'Clubs', icon: '🕺' },
+      { interest_id: 24, interest_tag: 'Concerts', icon: '🎫' },
+      { interest_id: 25, interest_tag: 'Festivals', icon: '🎉' },
+      { interest_id: 26, interest_tag: 'Karaoke', icon: '🎤' },
+      { interest_id: 27, interest_tag: 'Museums & galleries', icon: '🏛️' },
+      { interest_id: 28, interest_tag: 'Stand up', icon: '🎙️' },
+      { interest_id: 29, interest_tag: 'Theater', icon: '🎭' },
+    ]
+  },
+  {
+    category_id: 4, category_name: 'Music', icon: '🎵',
+    items: [
+      { interest_id: 30, interest_tag: 'Pop', icon: '🎤' },
+      { interest_id: 31, interest_tag: 'Rock', icon: '🎸' },
+      { interest_id: 32, interest_tag: 'Hip Hop', icon: '🎧' },
+      { interest_id: 33, interest_tag: 'Indie', icon: '🎹' },
+      { interest_id: 34, interest_tag: 'K-Pop', icon: '🇰🇷' },
+      { interest_id: 35, interest_tag: 'EDM', icon: '🎛️' },
+    ]
+  },
+  {
+    category_id: 5, category_name: 'Food & Drink', icon: '🍕',
+    items: [
+      { interest_id: 36, interest_tag: 'Sushi', icon: '🍣' },
+      { interest_id: 37, interest_tag: 'Vegan', icon: '🥗' },
+      { interest_id: 38, interest_tag: 'Coffee', icon: '☕' },
+      { interest_id: 39, interest_tag: 'Bubble Tea', icon: '🧋' },
+      { interest_id: 40, interest_tag: 'Pizza', icon: '🍕' },
+      { interest_id: 41, interest_tag: 'Street Food', icon: '🍢' },
+    ]
+  },
+  {
+    category_id: 6, category_name: 'Tech', icon: '💻',
+    items: [
+      { interest_id: 42, interest_tag: 'Coding', icon: '💻' },
+      { interest_id: 43, interest_tag: 'Gaming', icon: '🎮' },
+      { interest_id: 44, interest_tag: 'Crypto', icon: '💰' },
+      { interest_id: 45, interest_tag: 'AI', icon: '🤖' },
+      { interest_id: 46, interest_tag: 'Startups', icon: '🚀' },
+    ]
+  },
+  {
+    category_id: 7, category_name: 'Pets', icon: '🐶', items: []
+  },
+  {
+    category_id: 8, category_name: 'Traveling', icon: '✈️', items: []
+  }
+];
+
+// --- MOCK DỮ LIỆU ĐÃ CHỌN CỦA USER ---
+// Giả lập user đã chọn: Art (1), Gym (19), Coffee (38). 
+// Sau này bạn sẽ thay thế bằng API: GET /api/user-interests
+const MOCK_USER_INTERESTS = [1, 19, 38];
+
+export default function Preferences() {
+  const [prefs, setPrefs] = useState({
+    interested_in: "everyone",
+    age_min: 18,
+    age_max: 35,
+    max_distance_km: 50,
   });
 
-  const [preferences, setPreferences] = useState({
-    interestedIn: "Women",
-    ageMin: 25,
-    ageMax: 35,
-    maxDistance: 50,
-  });
+  const [categories, setCategories] = useState([]); 
+  
+  // State chứa ID các sở thích user đã chọn (bao gồm cả các ID đã được load lên)
+  const [selectedIds, setSelectedIds] = useState([]); 
 
-  const [interests, setInterests] = useState(["Travel", "Music", "Hiking"]);
-  const [newInterest, setNewInterest] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState(null);
 
-  const handleFormChange = (e) => {
+  // --- 1. Load dữ liệu khi vào trang (bao gồm sở thích cũ) ---
+  useEffect(() => {
+    // 1. Load danh sách Categories/Interests
+    setCategories(MOCK_CATEGORIES);
+    
+    // 2. Load sở thích cũ của user (đảm bảo chúng được highlight)
+    setSelectedIds(MOCK_USER_INTERESTS); 
+    
+    // Ghi chú: Sau này, nếu muốn load Preferences cũ (age_min, distance), 
+    // bạn cũng sẽ thực hiện Fetch API ở đây và dùng setPrefs(data.preferences)
+  }, []);
+
+  // --- Handlers ---
+  const handlePrefChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setPrefs((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: ["age_min", "age_max", "max_distance_km"].includes(name) 
+        ? Number(value) : value,
     }));
   };
 
-  const handlePreferencesChange = (e) => {
-    const { name, value } = e.target;
-    setPreferences((prev) => ({
-      ...prev,
-      [name]: isNaN(Number(value)) ? value : Number(value),
-    }));
+  // Logic Chọn/Bỏ chọn sở thích
+  const toggleInterest = (id) => {
+    setSelectedIds(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(item => item !== id); // Bỏ chọn
+      } else {
+        if (prev.length >= 10) {
+           alert("Chỉ được chọn tối đa 10 sở thích!");
+           return prev;
+        }
+        return [...prev, id]; // Chọn thêm
+      }
+    });
   };
 
-  const handleAddInterest = () => {
-    if (newInterest.trim() && !interests.includes(newInterest)) {
-      setInterests([...interests, newInterest]);
-      setNewInterest("");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage(null);
+
+    // Validation
+    if (prefs.age_min >= prefs.age_max) {
+      setMessage({ type: "error", text: "Min Age phải nhỏ hơn Max Age." });
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // const userId = 1; // Lấy từ Auth Context
+      
+      console.log("Submitting Final Interests (IDs):", selectedIds);
+      
+      // Giả lập thành công
+      setTimeout(() => {
+          setMessage({ type: "success", text: "Cập nhật thành công!" });
+          setLoading(false);
+      }, 1000);
+
+    } catch (err) {
+      console.error(err);
+      setMessage({ type: "error", text: "Có lỗi xảy ra." });
+      setLoading(false);
     }
   };
 
-  const handleRemoveInterest = (interest) => {
-    setInterests(interests.filter((i) => i !== interest));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Profile updated:", { formData, preferences, interests });
-  };
-
   return (
-    <div className="min-h-screen bg-background">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <main className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-xl">
+        
         <div className="text-center mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">
-            Edit your profile
-          </h1>
-          <p className="text-muted-foreground">
-            Update your information and preferences
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">Discovery Settings</h1>
+          <p className="text-gray-500 text-sm mt-1">Customize your matching experience</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Basic Info Card */}
-          <div className="bg-card rounded-lg border border-border p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-              <div className="w-1 h-6 bg-primary rounded-full" />
-              Basic Info
-            </h2>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label
-                    htmlFor="username"
-                    className="block text-sm font-medium text-foreground mb-1"
-                  >
-                    Username
-                  </label>
-                  <input
-                    type="text"
-                    id="username"
-                    value={formData.username}
-                    disabled
-                    className="w-full px-4 py-2 rounded-lg border border-input bg-secondary text-muted-foreground cursor-not-allowed"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-medium text-foreground mb-1"
-                  >
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    value={formData.email}
-                    disabled
-                    className="w-full px-4 py-2 rounded-lg border border-input bg-secondary text-muted-foreground cursor-not-allowed"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label
-                    htmlFor="gender"
-                    className="block text-sm font-medium text-foreground mb-1"
-                  >
-                    Gender
-                  </label>
-                  <select
-                    id="gender"
-                    name="gender"
-                    value={formData.gender}
-                    onChange={handleFormChange}
-                    className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-                  >
-                    <option>Male</option>
-                    <option>Female</option>
-                    <option>Non-binary</option>
-                    <option>Prefer not to say</option>
-                  </select>
-                </div>
-                <div>
-                  <label
-                    htmlFor="birthDate"
-                    className="block text-sm font-medium text-foreground mb-1"
-                  >
-                    Birth Date
-                  </label>
-                  <input
-                    type="date"
-                    id="birthDate"
-                    name="birthDate"
-                    value={formData.birthDate}
-                    onChange={handleFormChange}
-                    className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="bio"
-                  className="block text-sm font-medium text-foreground mb-1"
-                >
-                  Bio
-                </label>
-                <textarea
-                  id="bio"
-                  name="bio"
-                  value={formData.bio}
-                  onChange={handleFormChange}
-                  rows={3}
-                  className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-colors resize-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label
-                    htmlFor="jobTitle"
-                    className="block text-sm font-medium text-foreground mb-1"
-                  >
-                    Job Title
-                  </label>
-                  <input
-                    type="text"
-                    id="jobTitle"
-                    name="jobTitle"
-                    value={formData.jobTitle}
-                    onChange={handleFormChange}
-                    className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="company"
-                    className="block text-sm font-medium text-foreground mb-1"
-                  >
-                    Company
-                  </label>
-                  <input
-                    type="text"
-                    id="company"
-                    name="company"
-                    value={formData.company}
-                    onChange={handleFormChange}
-                    className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label
-                    htmlFor="education"
-                    className="block text-sm font-medium text-foreground mb-1"
-                  >
-                    Education
-                  </label>
-                  <input
-                    type="text"
-                    id="education"
-                    name="education"
-                    value={formData.education}
-                    onChange={handleFormChange}
-                    className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="location"
-                    className="block text-sm font-medium text-foreground mb-1"
-                  >
-                    Location
-                  </label>
-                  <input
-                    type="text"
-                    id="location"
-                    name="location"
-                    value={formData.location}
-                    onChange={handleFormChange}
-                    className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-                  />
-                </div>
-              </div>
-            </div>
+        {/* Thông báo */}
+        {message && (
+          <div className={`mb-4 p-3 rounded-lg flex items-center gap-2 text-sm font-medium ${
+            message.type === 'error' ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-600 border border-green-100'
+          }`}>
+            <AlertCircle className="w-4 h-4" />
+            {message.text}
           </div>
+        )}
 
-          {/* Match Preferences Card */}
-          <div className="bg-card rounded-lg border border-border p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-              <div className="w-1 h-6 bg-primary rounded-full" />
-              Match Preferences
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label
-                  htmlFor="interestedIn"
-                  className="block text-sm font-medium text-foreground mb-1"
-                >
-                  Interested In
-                </label>
-                <select
-                  id="interestedIn"
-                  name="interestedIn"
-                  value={preferences.interestedIn}
-                  onChange={handlePreferencesChange}
-                  className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-                >
-                  <option>Men</option>
-                  <option>Women</option>
-                  <option>Everyone</option>
-                </select>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
+          <form onSubmit={handleSubmit} className="space-y-8">
+            
+            {/* --- PHẦN 1: PREFERENCES --- */}
+            <div className="space-y-6 border-b border-gray-100 pb-6">
                 <div>
-                  <label
-                    htmlFor="ageMin"
-                    className="block text-sm font-medium text-foreground mb-1"
-                  >
-                    Age Range: Min
-                  </label>
-                  <input
-                    type="number"
-                    id="ageMin"
-                    name="ageMin"
-                    value={preferences.ageMin}
-                    onChange={handlePreferencesChange}
-                    min="18"
-                    max="100"
-                    className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="ageMax"
-                    className="block text-sm font-medium text-foreground mb-1"
-                  >
-                    Age Range: Max
-                  </label>
-                  <input
-                    type="number"
-                    id="ageMax"
-                    name="ageMax"
-                    value={preferences.ageMax}
-                    onChange={handlePreferencesChange}
-                    min="18"
-                    max="100"
-                    className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="maxDistance"
-                  className="block text-sm font-medium text-foreground mb-1"
-                >
-                  Max Distance (km)
-                </label>
-                <input
-                  type="number"
-                  id="maxDistance"
-                  name="maxDistance"
-                  value={preferences.maxDistance}
-                  onChange={handlePreferencesChange}
-                  min="1"
-                  max="500"
-                  className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Interests Card */}
-          <div className="bg-card rounded-lg border border-border p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-              <div className="w-1 h-6 bg-primary rounded-full" />
-              Interests
-            </h2>
-            <div className="space-y-4">
-              {interests.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {interests.map((interest) => (
-                    <div
-                      key={interest}
-                      className="bg-primary text-primary-foreground px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2"
-                    >
-                      {interest}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveInterest(interest)}
-                        className="hover:opacity-80 transition-opacity"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">I'm interested in</label>
+                    <div className="grid grid-cols-3 gap-3">
+                        {['male', 'female', 'everyone'].map((option) => (
+                        <button
+                            key={option} type="button"
+                            onClick={() => setPrefs(p => ({ ...p, interested_in: option }))}
+                            className={`py-2 rounded-lg text-sm font-medium capitalize border transition-all ${
+                            prefs.interested_in === option
+                                ? "bg-pink-600 text-white border-pink-600 shadow-md"
+                                : "bg-white text-gray-600 border-gray-200 hover:border-pink-300"
+                            }`}
+                        >
+                            {option}
+                        </button>
+                        ))}
                     </div>
-                  ))}
                 </div>
-              )}
 
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={newInterest}
-                  onChange={(e) => setNewInterest(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      handleAddInterest();
-                    }
-                  }}
-                  placeholder="Add an interest..."
-                  className="flex-1 px-4 py-2 rounded-lg border border-input bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-                />
-                <button
-                  type="button"
-                  onClick={handleAddInterest}
-                  className="bg-secondary hover:bg-secondary/80 text-foreground font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-1"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add
-                </button>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <div className="flex justify-between mb-2">
+                            <label className="text-sm font-bold text-gray-700">Age Range</label>
+                            <span className="text-sm font-medium text-pink-600">{prefs.age_min} - {prefs.age_max}</span>
+                        </div>
+                        <div className="flex gap-2 items-center">
+                            <input type="number" name="age_min" value={prefs.age_min} onChange={handlePrefChange} className="w-full px-3 py-2 border rounded-lg text-center outline-none focus:ring-2 focus:ring-pink-500/20" />
+                            <span className="text-gray-400">-</span>
+                            <input type="number" name="age_max" value={prefs.age_max} onChange={handlePrefChange} className="w-full px-3 py-2 border rounded-lg text-center outline-none focus:ring-2 focus:ring-pink-500/20" />
+                        </div>
+                    </div>
+                    <div>
+                        <div className="flex justify-between mb-2">
+                            <label className="text-sm font-bold text-gray-700">Distance</label>
+                            <span className="text-sm font-medium text-pink-600">{prefs.max_distance_km} km</span>
+                        </div>
+                        <input type="range" name="max_distance_km" min="1" max="200" value={prefs.max_distance_km} onChange={handlePrefChange} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-pink-600 mt-3" />
+                    </div>
+                </div>
+            </div>
+
+            {/* --- PHẦN 2: INTERESTS (Tinder Style) --- */}
+            <div>
+              <div className="flex justify-between items-end mb-4">
+                  <label className="block text-lg font-bold text-gray-800">Interests</label>
+                  <span className="text-sm text-gray-500">{selectedIds.length}/10 selected</span>
+              </div>
+              
+              <div className="space-y-6">
+                {categories.map((cat) => (
+                  cat.items.length > 0 && (
+                    <div key={cat.category_id}>
+                      {/* Tiêu đề nhóm */}
+                      <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                          <span>{cat.icon}</span> {cat.category_name}
+                      </h3>
+                      
+                      {/* Danh sách Pills */}
+                      <div className="flex flex-wrap gap-2">
+                          {cat.items.map((item) => {
+                              // KIỂM TRA ĐÂY: Dựa vào selectedIds để xác định trạng thái đã chọn
+                              const isSelected = selectedIds.includes(item.interest_id); 
+                              return (
+                                  <button
+                                      key={item.interest_id}
+                                      type="button"
+                                      onClick={() => toggleInterest(item.interest_id)}
+                                      className={`
+                                          px-3 py-1.5 rounded-full text-sm font-medium border transition-all flex items-center gap-1.5
+                                          ${isSelected 
+                                              ? "bg-white border-pink-500 text-pink-600 shadow-sm ring-1 ring-pink-500" // Đã chọn
+                                              : "bg-white border-gray-300 text-gray-600 hover:border-pink-300 hover:bg-gray-50" // Chưa chọn
+                                          }
+                                      `}
+                                  >
+                                      <span>{item.icon}</span>
+                                      {item.interest_tag}
+                                  </button>
+                              )
+                          })}
+                      </div>
+                    </div>
+                  )
+                ))}
               </div>
             </div>
-          </div>
 
-          <button
-            type="submit"
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
-          >
-            <Heart className="w-5 h-5" />
-            Save Changes
-          </button>
-        </form>
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-pink-600 hover:bg-pink-700 disabled:opacity-70 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-pink-600/30 flex justify-center items-center gap-2 active:scale-[0.98]"
+            >
+              {loading ? "Saving..." : <><Save className="w-5 h-5" /> Save Changes</>}
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
+    </main>
   );
 }
