@@ -18,7 +18,11 @@
     "@tailwindcss/vite": "^4.1.17",
     "axios": "^1.13.2",
     "clsx": "^2.1.1",
+<<<<<<< HEAD
     "jsonwebtoken": "^9.0.3",
+=======
+    "lucide-react": "^0.555.0",
+>>>>>>> 6affeb0834c9493ac533f37efe9e6b02229ad3d7
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-fontawesome": "^1.7.1",
