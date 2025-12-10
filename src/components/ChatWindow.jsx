@@ -1,103 +1,82 @@
-import React, { useEffect, useState } from "react";
-import io from "socket.io-client";
-function ChatWindow({ currentUserId, currentMatchId, opponentName, socket: propSocket }) {
-  const [messages, setMessages] = useState([]);
+import React, { useState, useEffect, useRef } from "react";
+
+function ChatWindow({
+  messages,
+  currentUserId,
+  currentMatchId,
+  opponentName,
+  typingUserId,
+  sendMessage,
+  sendTyping,
+  addOptimisticMessage
+}) {
   const [input, setInput] = useState("");
-  const [typing, setTyping] = useState("");
+  const messagesEndRef = useRef(null);
 
-  // Dùng socket từ parent hoặc tạo mới (tùy cách bạn truyền)
-  const socket = propSocket || io("http://localhost:8005");
-
+  // Cuộn xuống tin nhắn mới nhất
   useEffect(() => {
-    socket.emit("join_match", currentMatchId);
-    socket.emit("get_messages", currentMatchId);
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-    const handlers = {
-      previous_messages: (msgs) => {
-        setMessages(msgs.map(m => ({
-          text: m.content || "[ảnh]",
-          type: m.from_user_id === currentUserId ? "sent" : "received",
-          name: m.from_user_id === currentUserId ? "Bạn" : opponentName
-        })));
-      },
-      new_message: (msg) => {
-        if (msg.match_id === currentMatchId) {
-          setMessages(prev => [...prev, {
-            text: msg.content || "[ảnh]",
-            type: msg.from_user_id === currentUserId ? "sent" : "received",
-            name: msg.from_user_id === currentUserId ? "Bạn" : opponentName
-          }]);
-        }
-      },
-      user_typing: ({ userId, isTyping }) => {
-        if (userId !== currentUserId) {
-          setTyping(isTyping ? `${opponentName} đang nhập...` : "");
-        }
-      }
-    };
-
-    Object.entries(handlers).forEach(([event, handler]) => {
-      socket.on(event, handler);
-    });
-
-    return () => {
-      Object.keys(handlers).forEach(event => socket.off(event, handlers[event]));
-      socket.emit("leave_match", currentMatchId);
-    };
-  }, [currentMatchId, currentUserId, opponentName, socket]);
-
-  // Gửi typing
+  // Gửi typing khi gõ
   useEffect(() => {
-    socket.emit("typing", {
-      matchId: currentMatchId,
-      isTyping: input.length > 0
-    });
-  }, [input, socket, currentMatchId]);
+    sendTyping(currentMatchId, input.length > 0);
+  }, [input, currentMatchId, sendTyping]);
 
-  const sendMessage = () => {
+  const handleSend = () => {
     if (!input.trim()) return;
-    socket.emit("send_message", {
-      matchId: currentMatchId,
-      fromUserId: currentUserId,
-      content: input.trim()
-    });
+    addOptimisticMessage(input.trim());
+    sendMessage( input.trim(), null);
     setInput("");
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex w-full flex-col h-full  bg-white">
       {/* Header */}
-      <div className="p-4 border-b font-bold flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-gray-300"></div>
+      <div className="p-4 border-b font-bold text-lg flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-linear-to-r from-pink-500 to-violet-500"></div>
         <div>{opponentName}</div>
+        {typingUserId && (
+          <span className="text-sm text-green-600 ml-auto">đang nhập...</span>
+        )}
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      {/* Tin nhắn */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.type === "sent" ? "justify-end" : "justify-start"}`}>
-            <div className={`max-w-xs px-4 py-2 rounded-2xl ${
-              msg.type === "sent" ? "bg-blue-500 text-white" : "bg-gray-200"
-            }`}>
-              {msg.text}
+          <div
+            key={i}
+            className={`flex ${msg.from_user_id != currentUserId ? "justify-start" : "justify-end"}`}
+          >
+            <div
+              className={`max-w-xs px-4 py-2 rounded-2xl ${
+                msg.from_user_id != currentUserId
+                  ? "bg-gray-200 text-black"
+                  : "bg-blue-500 text-white"
+              }`}
+            >
+              {msg.content || "[ảnh]"}
+              {msg.read_at && msg.partner_id != currentUserId && (
+                <span className="block text-xs opacity-70 mt-1 text-right">đã xem</span>
+              )}
             </div>
           </div>
         ))}
-        {typing && <div className="text-sm text-gray-500 italic">{typing}</div>}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t flex gap-3">
+      <div className="p-4 border-t flex gap-2">
         <input
-          className="flex-1 px-4 py-3 border rounded-full focus:outline-none"
-          placeholder="Nhập tin nhắn..."
+          className="flex-1 px-5 mx-10 py-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Aa..."
           value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === "Enter" && sendMessage()}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSend()}
         />
         <button
-          onClick={sendMessage}
-          className="px-6 py-3 bg-blue-500 text-white rounded-full hover:bg-blue-600"
+          onClick={handleSend}
+          className="px-6 py-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition"
         >
           Gửi
         </button>
@@ -106,4 +85,4 @@ function ChatWindow({ currentUserId, currentMatchId, opponentName, socket: propS
   );
 }
 
-export {ChatWindow}
+export { ChatWindow };
