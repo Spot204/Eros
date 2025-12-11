@@ -10,7 +10,7 @@ const userId = req.query.user_id;
 
 const result = await pool.query(
 `SELECT * FROM users
-WHERE id != $1
+WHERE user_id != $1
 ORDER BY RANDOM()
 LIMIT 20;`,
 [userId]
