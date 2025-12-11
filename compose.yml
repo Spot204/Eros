@@ -36,7 +36,7 @@ services:
     restart: always
 
   match-service:
-    build: ./src/server/matchService
+    build: ./backend/matchService
     container_name: eros-match
     ports:
       - "8006:8006"
@@ -45,7 +45,7 @@ services:
       - redis
     restart: always
     env_file:
-      - ./src/server/matchService/.env
+      - ./backend/matchService/.env
 
 volumes:
   postgres_data:
