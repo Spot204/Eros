@@ -9,7 +9,7 @@ export const getRecommendations = (userId) =>
 
 export const swipe = (fromUserId, toUserId, action) =>
   axios.post(`${BASE}/swipe`, {
-    fromUser: fromUserId,
-    toUser: toUserId,
-    action,
+    from_user_id: fromUserId,
+    to_user_id: toUserId,
+    action
   });
