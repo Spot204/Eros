@@ -1,44 +1,48 @@
 import { useEffect, useRef, useState } from "react";
 import SwipeCard from "../components/SwipeCard";
 import UserDetailModal from "../components/UserDetailModal";
+import { getRecommendations, swipe as swipeApi } from "../api/match";
 
 export default function Swipe() {
   const [users, setUsers] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedUser, setSelectedUser] = useState(null);
-
   const cardRefs = useRef([]);
 
-  const currentUserId = 1; // tạm
+  const currentUserId = 1;
 
   // ---- LOAD GỢI Ý ----
   const loadNextUser = async () => {
     try {
-      const res = await fetch(`http://localhost:8005/api/matches/next?user_id=${currentUserId}`);
-      const data = await res.json();
+      console.log("➡️ Load recommendations for user:", currentUserId);
+      const res = await getRecommendations(currentUserId);
+      console.log("✅ Recommendations:", res.data);
 
-      setUsers(data || []);
+      setUsers(res.data);
+      setActiveIndex(0);
     } catch (err) {
-      console.error("Error loading next user:", err);
+      console.error("❌ loadNextUser error:", err);
     }
   };
 
+  useEffect(() => {
+    loadNextUser();
+  }, []);
+
+  // ---- SWIPE ----
   const handleSwipe = async (targetId, direction) => {
     try {
-      await fetch("http://localhost:8005/api/matches/swipe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fromUser: currentUserId,
-          toUser: targetId,
-          action: direction === "right" ? "LIKE" : "NOPE",
-        }),
-      });
+      await swipeApi(
+        currentUserId,
+        targetId,
+        direction === "right" ? "LIKE" : "PASS"
+      );
+      console.log("✅ Swipe success:", targetId);
     } catch (err) {
-      console.error("SWIPE ERROR:", err);
+      console.error("❌ Swipe error:", err);
     }
 
-    loadNextUser();
+    setActiveIndex((prev) => prev + 1);
   };
 
   // ---- CLICK BUTTON SWIPE ----
@@ -63,7 +67,7 @@ export default function Swipe() {
           .slice(activeIndex, activeIndex + 3)
           .map((user, i) => (
             <SwipeCard
-              key={user.id}
+              key={user.user_id}
               user={user}
               zIndex={100 - i}
               onSwipe={handleSwipe}
@@ -78,7 +82,7 @@ export default function Swipe() {
         {/* Nút X – Swipe Left */}
         <button
           onClick={swipeLeft}
-          className="w-16 h-16 rounded-full bg-white shadow-md flex items-center justify-center text-red-500 text-3xl active:scale-90 transition"
+          className="w-12 h-12 bg-white rounded-full shadow-md border flex items-center justify-center hover:scale-110 transition"
         >
           ✖
         </button>
@@ -86,7 +90,7 @@ export default function Swipe() {
         {/* Nút Heart – Swipe Right */}
         <button
           onClick={swipeRight}
-          className="w-16 h-16 rounded-full bg-white shadow-md flex items-center justify-center text-pink-500 text-3xl active:scale-90 transition"
+          className="w-12 h-12 bg-white rounded-full shadow-md border flex items-center justify-center hover:scale-110 transition"
         >
           ❤️
         </button>
