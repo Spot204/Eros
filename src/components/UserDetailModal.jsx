@@ -1,48 +1,89 @@
 export default function UserDetailModal({ user, onClose }) {
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-pink-50 w-[360px] max-h-[85vh] p-6 rounded-2xl overflow-y-auto relative shadow-xl">
+  const age =
+    new Date().getFullYear() -
+    new Date(user.birth_date).getFullYear();
 
+  return (
+    <div className="fixed inset-0 z-[999] bg-black/60 flex items-center justify-center">
+      <div className="bg-white w-[380px] max-h-[90vh] rounded-2xl overflow-y-auto shadow-2xl relative">
+
+        {/* CLOSE */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-pink-500 hover:text-pink-700 text-xl"
+          className="absolute top-3 right-3 z-10 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow"
         >
           ✖
         </button>
 
-        <h2 className="text-2xl font-bold mb-1">
-          {user.name}, {user.age}
-        </h2>
-
-        <p className="text-gray-600 mb-4">{user.bio}</p>
-
-        <div className="mb-4">
-          <p className="font-semibold">🎓 Học vấn</p>
-          <p>{user.education || "Không có thông tin"}</p>
+        {/* AVATAR */}
+        <div className="w-full h-[360px]">
+          <img
+            src={user.avatar || "https://via.placeholder.com/400"}
+            alt={user.username}
+            className="w-full h-full object-cover rounded-t-2xl"
+          />
         </div>
 
-        <div className="mb-4">
-          <p className="font-semibold">💼 Công việc</p>
-          <p>{user.jobTitle ? `${user.jobTitle} tại ${user.company}` : "—"}</p>
-        </div>
+        {/* CONTENT */}
+        <div className="p-5">
+          <h2 className="text-2xl font-bold mb-1">
+            {user.username}, {age}
+          </h2>
 
-        <div className="mb-4">
-          <p className="font-semibold">✨ Sở thích</p>
-          <p>{user.hobbies || "—"}</p>
-        </div>
+          {user.bio && (
+            <p className="text-gray-600 mb-4">{user.bio}</p>
+          )}
 
-        <div className="mb-4">
-          <p className="font-semibold mb-2">📸 Ảnh khác</p>
-
-          <div className="grid grid-cols-2 gap-2">
-            {user.photos?.map((img, i) => (
-              <img
-                key={i}
-                src={img}
-                className="w-full h-28 object-cover rounded"
-              />
-            ))}
+          {/* EDUCATION */}
+          <div className="mb-3">
+            <p className="font-semibold">🎓 Học vấn</p>
+            <p className="text-gray-700">
+              {user.education || "Chưa cập nhật"}
+            </p>
           </div>
+
+          {/* JOB */}
+          <div className="mb-3">
+            <p className="font-semibold">💼 Công việc</p>
+            <p className="text-gray-700">
+              {user.job_title
+                ? `${user.job_title}${user.company ? " tại " + user.company : ""}`
+                : "Chưa cập nhật"}
+            </p>
+          </div>
+
+          {/* INTERESTS */}
+          {user.interests?.length > 0 && (
+            <div className="mb-4">
+              <p className="font-semibold mb-2">✨ Sở thích</p>
+              <div className="flex flex-wrap gap-2">
+                {user.interests.map((tag, i) => (
+                  <span
+                    key={i}
+                    className="px-3 py-1 bg-pink-100 text-pink-600 rounded-full text-sm"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* PHOTOS */}
+          {user.photos?.length > 1 && (
+            <div className="mt-4">
+              <p className="font-semibold mb-2">📸 Ảnh khác</p>
+              <div className="grid grid-cols-2 gap-2">
+                {user.photos.slice(1).map((img, i) => (
+                  <img
+                    key={i}
+                    src={img}
+                    className="w-full h-32 object-cover rounded-lg"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
