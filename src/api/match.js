@@ -1,11 +1,15 @@
 import axios from "axios";
 
-const BASE = "http://localhost:8010/match";
+const BASE = "http://localhost:8006/api";
 
 export const getRecommendations = (userId) =>
-  axios.get(`${BASE}/recommend/${userId}`);
+  axios.get(`${BASE}/next`, {
+    params: { user_id: userId },
+  });
 
 export const swipe = (fromUserId, toUserId, action) =>
-  axios.post(`${BASE}/swipe`, null, {
-    params: { fromUserId, toUserId, action },
+  axios.post(`${BASE}/swipe`, {
+    fromUser: fromUserId,
+    toUser: toUserId,
+    action,
   });
