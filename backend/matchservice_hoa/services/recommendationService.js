@@ -37,10 +37,8 @@ export const fetchNextUsers = async (userId) => {
   return result.rows;
 };
 
-// Swipe + match
-export const recordSwipe = async (fromUser, toUser, liked) => {
-  const action = liked ? "LIKE" : "PASS";
-
+export const recordSwipe = async (fromUser, toUser, action) => {
+  // 1. Lưu swipe
   await pool.query(
     `
     INSERT INTO swipes (from_user_id, to_user_id, action)
@@ -51,11 +49,16 @@ export const recordSwipe = async (fromUser, toUser, liked) => {
     [fromUser, toUser, action]
   );
 
-  if (!liked) return { match: false };
+  // Nếu PASS → dừng
+  if (action === "PASS") {
+    return { match: false };
+  }
 
+  // 2. Check đối phương đã LIKE mình chưa
   const check = await pool.query(
     `
-    SELECT 1 FROM swipes
+    SELECT 1
+    FROM swipes
     WHERE from_user_id = $1
       AND to_user_id = $2
       AND action = 'LIKE'
@@ -63,21 +66,28 @@ export const recordSwipe = async (fromUser, toUser, liked) => {
     [toUser, fromUser]
   );
 
-  if (check.rowCount === 0) return { match: false };
+  if (check.rowCount === 0) {
+    return { match: false };
+  }
 
+  // 3. Tạo match (chuẩn hóa thứ tự)
   const [u1, u2] =
     fromUser < toUser ? [fromUser, toUser] : [toUser, fromUser];
 
-  await pool.query(
+  const matchResult = await pool.query(
     `
     INSERT INTO matches (user1_id, user2_id)
     VALUES ($1, $2)
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT DO NOTHING
+    RETURNING match_id;
     `,
     [u1, u2]
   );
 
-  return { match: true };
+  return {
+    match: true,
+    match_id: matchResult.rows[0]?.match_id
+  };
 };
 
 // Matches
