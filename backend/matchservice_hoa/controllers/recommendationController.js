@@ -20,12 +20,17 @@ export const getNextRecommendations = async (req, res) => {
 
 export const sendSwipe = async (req, res) => {
   try {
-    const { user_id, target_id, liked } = req.body;
-    const action = liked ? "LIKE" : "PASS";
-    const result = await recordSwipe(user_id, target_id, action);
+    const { from_user_id, to_user_id, action } = req.body;
+
+    const result = await recordSwipe(
+      from_user_id,
+      to_user_id,
+      action
+    );
+
     res.json(result);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
