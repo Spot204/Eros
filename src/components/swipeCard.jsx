@@ -34,7 +34,8 @@ const SwipeCard = forwardRef(({ user, zIndex, onSwipe, onShowDetail }, ref) => {
   const triggerSwipe = (direction) => {
     setButtonSwipe(direction);
     setTimeout(() => {
-      onSwipe(user.id, direction);
+      // 🔥 FIX QUAN TRỌNG
+      onSwipe(user.user_id, direction);
     }, 300);
   };
 
@@ -60,14 +61,14 @@ const SwipeCard = forwardRef(({ user, zIndex, onSwipe, onShowDetail }, ref) => {
       onTouchEnd={handleEnd}
     >
       <img
-        src={user.photos?.[0] || "https://via.placeholder.com/400"}
-        alt={user.name}
+        src={user.avatar || "https://via.placeholder.com/400"}
+        alt={user.username}
         className="w-full h-full object-cover"
       />
 
       <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/60 to-transparent text-white">
         <h2 className="text-xl font-semibold">
-          {user.name}, {user.age}
+          {user.username}
         </h2>
 
         <p className="text-white/80 text-sm">{user.bio}</p>
