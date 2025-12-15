@@ -49,6 +49,18 @@ services:
       - postgres
     restart: always
 
+  match-service:
+  build: ./backend/matchservice_hoa
+  container_name: eros-match
+  ports:
+    - "8006:8006"
+  depends_on:
+    - postgres
+    - redis
+  restart: always
+  env_file:
+    - ./backend/matchservice_hoa/.env
+
 volumes:
   postgres_data:
   # ... (Phần postgres, redis, chat-service giữ nguyên y hệt cũ)
