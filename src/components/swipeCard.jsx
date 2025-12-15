@@ -68,7 +68,10 @@ const SwipeCard = forwardRef(({ user, zIndex, onSwipe, onShowDetail }, ref) => {
 
       <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/60 to-transparent text-white">
         <h2 className="text-xl font-semibold">
-          {user.username}
+          {user.username}, 
+          {user.distance_km != null
+            ? `${user.distance_km} km`
+            : "Không xác định"}
         </h2>
 
         <p className="text-white/80 text-sm">{user.bio}</p>
