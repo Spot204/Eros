@@ -35,17 +35,20 @@ services:
       - redis
     restart: always
 
-  match-service:
-    build: ./backend/matchservice_hoa
-    container_name: eros-match
+  profile-service:
+    build: ./src/server/ProfileService
+    container_name: eros-profile
     ports:
-      - "8006:8006"
+      - "4000:4000"
+    environment:
+      DB_HOST: postgres
+      DB_USER: postgres
+      DB_PASS: 123456
+      DB_NAME: eros
     depends_on:
       - postgres
-      - redis
     restart: always
-    env_file:
-      - ./backend/matchservice_hoa/.env
 
 volumes:
   postgres_data:
+  # ... (Phần postgres, redis, chat-service giữ nguyên y hệt cũ)
