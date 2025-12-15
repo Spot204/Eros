@@ -35,14 +35,20 @@ services:
       - redis
     restart: always
 
-  auth-service:
-    build: ./src/server/authService
-    container_name: eros-auth
+  profile-service:
+    build: ./src/server/ProfileService
+    container_name: eros-profile
     ports:
-      - "8006:8006"
+      - "4000:4000"
+    environment:
+      DB_HOST: postgres
+      DB_USER: postgres
+      DB_PASS: 123456
+      DB_NAME: eros
     depends_on:
       - postgres
-      - redis
+    restart: always
 
 volumes:
   postgres_data:
+  # ... (Phần postgres, redis, chat-service giữ nguyên y hệt cũ)
