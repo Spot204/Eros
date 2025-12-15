@@ -1,6 +1,7 @@
 import React from "react";
 
-function ChatSidebar({ matches, selectedMatchId, onSelectMatch }) {
+function ChatSidebar({ matches, selectedMatchId, onSelectMatch, currentId }) {
+  
   return (
     <div className="w-96 bg-white border-r border-gray-300 flex flex-col">
       <div className="px-5 border-b font-bold text-xl py-5.5">Tin nhắn</div>
@@ -10,7 +11,7 @@ function ChatSidebar({ matches, selectedMatchId, onSelectMatch }) {
           <div className="p-8 text-center text-gray-500">Chưa có tin nhắn nào</div>
         ) : (
           matches.map((match) => {
-            const isActive = selectedMatchId === match.match_id;
+            const isActive = selectedMatchId == match.match_id;
 
             return (
               <div
@@ -37,7 +38,7 @@ function ChatSidebar({ matches, selectedMatchId, onSelectMatch }) {
                     </div>
                   </div>
 
-                  {match.unread_count > 0 && (
+                  {match.unread_count > 0 && match.from_user_id == currentId && (
                     <div className="bg-red-500 text-white text-xs rounded-full px-2 py-1">
                       {match.unread_count}
                     </div>
