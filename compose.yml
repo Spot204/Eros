@@ -35,5 +35,14 @@ services:
       - redis
     restart: always
 
+  auth-service:
+    build: ./src/server/authService
+    container_name: eros-auth
+    ports:
+      - "8006:8006"
+    depends_on:
+      - postgres
+      - redis
+
 volumes:
   postgres_data:
