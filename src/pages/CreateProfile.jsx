@@ -1,6 +1,12 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Dùng để chuyển trang sau khi lưu xong
+import LocationPicker from "../components/LocationPicker";
+import { Loader2 } from "lucide-react"; // Icon loading nếu cần
 
 export default function CreateProfile() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     gender: "",
     birthDate: "",
@@ -8,7 +14,9 @@ export default function CreateProfile() {
     jobTitle: "",
     company: "",
     education: "",
-    location: "", // Hiện tại là text, sau này gắn AutoComplete API vào đây
+    location: "", // Để hiển thị text địa chỉ (nếu cần)
+    latitude: null, // Quan trọng: Để lưu vào PostGIS
+    longitude: null // Quan trọng: Để lưu vào PostGIS
   });
 
   // State lưu lỗi validation
@@ -21,13 +29,26 @@ export default function CreateProfile() {
       [name]: value,
     }));
     
-    // Xóa lỗi của trường đó khi người dùng bắt đầu nhập lại
+    // Xóa lỗi khi nhập lại
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: "" }));
     }
   };
 
-  // Hàm tính tuổi chính xác
+  // Hàm nhận dữ liệu từ LocationPicker
+  const handleLocationSelect = (data) => {
+    // data = { latitude, longitude, address }
+    setFormData(prev => ({
+        ...prev,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        location: data.address // Lưu tên địa chỉ để hiển thị hoặc validate
+    }));
+    // Xóa lỗi location nếu có
+    if (errors.location) setErrors(prev => ({ ...prev, location: "" }));
+  };
+
+  // Hàm tính tuổi
   const calculateAge = (birthDateString) => {
     const today = new Date();
     const birthDate = new Date(birthDateString);
@@ -43,7 +64,6 @@ export default function CreateProfile() {
     let newErrors = {};
     let isValid = true;
 
-    // 1. Check Tuổi (Quan trọng nhất)
     if (!formData.birthDate) {
       newErrors.birthDate = "Please select your birth date.";
       isValid = false;
@@ -55,19 +75,17 @@ export default function CreateProfile() {
       }
     }
 
-    // 2. Check Gender
     if (!formData.gender) {
       newErrors.gender = "Please select your gender.";
       isValid = false;
     }
 
-    // 3. Check Location
-    if (!formData.location.trim()) {
-      newErrors.location = "Location is required.";
+    // Validate tọa độ thay vì text location
+    if (!formData.latitude || !formData.longitude) {
+      newErrors.location = "Please select a valid location from the map or search.";
       isValid = false;
     }
 
-    // 4. Check Bio (Không bắt buộc nhưng nên giới hạn độ dài)
     if (formData.bio.length > 500) {
       newErrors.bio = "Bio is too long (max 500 characters).";
       isValid = false;
@@ -77,18 +95,42 @@ export default function CreateProfile() {
     return isValid;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (validateForm()) {
-      // Dữ liệu sạch, sẵn sàng gửi API hoặc chuyển trang
-      console.log("Valid Data submitted:", formData);
-      
-      // TODO: Call API here
-      // nextStep();
-    } else {
-      console.log("Form has errors");
-      // Scroll lên đầu hoặc focus vào lỗi (optional)
+    if (!validateForm()) {
+        console.log("Form has errors");
+        return;
+    }
+
+    setLoading(true);
+    try {
+        const userId = 1; // Hardcode user 1
+
+        // Gọi API Backend
+        const res = await fetch("http://localhost:4000/api/profile/update", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId, ...formData }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.error || "Failed to create profile");
+        }
+
+        console.log("Profile created:", data);
+        
+        // Thành công -> Chuyển sang trang tiếp theo (VD: Upload Ảnh hoặc Chọn Sở thích)
+        // Bạn đổi đường dẫn này theo router thực tế của bạn nhé
+        navigate("/manage-photo"); 
+
+    } catch (err) {
+        console.error(err);
+        alert("Lỗi khi tạo profile: " + err.message);
+    } finally {
+        setLoading(false);
     }
   };
 
@@ -118,7 +160,6 @@ export default function CreateProfile() {
                         onChange={handleChange}
                         className="peer sr-only" 
                       />
-                      {/* Custom Radio Button Style */}
                       <div className={`w-5 h-5 border-2 rounded-full flex items-center justify-center transition-all ${
                         formData.gender === option ? 'border-pink-500 bg-pink-500' : 'border-gray-300 group-hover:border-pink-300'
                       }`}>
@@ -154,29 +195,14 @@ export default function CreateProfile() {
               {errors.birthDate && <p className="text-red-500 text-xs mt-1.5">{errors.birthDate}</p>}
             </div>
 
-            {/* Location (Text input for future API) */}
+            {/* Location (Dùng LocationPicker mới) */}
             <div>
-              <label htmlFor="location" className="block text-sm font-semibold text-gray-700 mb-2">
-                Location
-              </label>
-              <input
-                type="text"
-                id="location"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                placeholder="Ex: 13 Ngo Phung Khoang, Ha Noi"
-                className={`w-full px-4 py-3 rounded-xl border bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition-all ${
-                  errors.location 
-                    ? "border-red-500 focus:ring-red-200" 
-                    : "border-gray-200 focus:ring-pink-500/20 focus:border-pink-500"
-                }`}
-              />
-              {errors.location && <p className="text-red-500 text-xs mt-1.5">{errors.location}</p>}
-              <p className="text-xs text-gray-400 mt-1">We will suggest exact addresses soon.</p>
+               <LocationPicker onLocationSelect={handleLocationSelect} />
+               {errors.location && <p className="text-red-500 text-xs mt-1.5">{errors.location}</p>}
+               <p className="text-xs text-gray-400 mt-1">We need your location to suggest matches nearby.</p>
             </div>
 
-            {/* Job & Company (Gộp 2 cột cho gọn) */}
+            {/* Job & Company */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Job Title</label>
@@ -242,9 +268,17 @@ export default function CreateProfile() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-pink-600/30 transition-all active:scale-[0.98] mt-4"
+              disabled={loading}
+              className="w-full bg-pink-600 hover:bg-pink-700 disabled:opacity-70 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-pink-600/30 transition-all active:scale-[0.98] mt-4 flex justify-center items-center gap-2"
             >
-              Continue to Photos
+              {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Creating Profile...
+                  </>
+              ) : (
+                  "Continue to Photos"
+              )}
             </button>
           </form>
         </div>
