@@ -121,18 +121,18 @@ export const useChat = (userId) => {
   };
 
   // Đánh dấu đã đọc
-  const markAsRead = async (matchId) => {
+  const markAsRead = async (matchId, currentId) => {
     try {
-      await axios.put(
-        `${API_URL}/matches/${matchId}/read`,
-        {},
-        {
-          params: { userId },
-        }
-      );
-    } catch (err) {
-      console.error("Lỗi markAsRead:", err);
-    }
+    await axios.put(
+      `${API_URL}/matches/${matchId}/read`,
+      null, 
+      {
+        params: { userId: currentId }, 
+      }
+    );
+  } catch (err) {
+    console.error("Lỗi markAsRead:", err);
+  }
   };
 
   return {

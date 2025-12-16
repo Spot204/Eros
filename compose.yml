@@ -51,4 +51,3 @@ services:
 
 volumes:
   postgres_data:
-  # ... (Phần postgres, redis, chat-service giữ nguyên y hệt cũ)

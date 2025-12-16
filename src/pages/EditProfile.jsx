@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { Camera, Save, AlertCircle } from "lucide-react";
+// Đảm bảo bạn đã tạo file LocationPicker.jsx trong folder components như hướng dẫn trước
+import LocationPicker from "../components/LocationPicker"; 
 
 export default function EditProfile() {
   // State chứa thông tin Profile
@@ -12,6 +14,8 @@ export default function EditProfile() {
     education: "",
     birthDate: "",
     gender: "male",
+    latitude: null,  // Thêm để lưu tọa độ
+    longitude: null, // Thêm để lưu tọa độ
   });
 
   // State cho phần Sở thích (Interests)
@@ -25,9 +29,9 @@ export default function EditProfile() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const userId = 1; // Hardcode user 1
+        const userId = 1; // Hardcode user 1 (Sau này lấy từ Token/AuthContext)
 
-        // Gọi 2 API song song: Metadata và Profile hiện tại
+        // Gọi 2 API song song: Metadata (Menu sở thích) và Profile hiện tại
         const [metaRes, profileRes] = await Promise.all([
           fetch("http://localhost:4000/api/metadata/interests"),
           fetch(`http://localhost:4000/api/profile/${userId}`),
@@ -42,20 +46,24 @@ export default function EditProfile() {
         // 2. Set Sở thích đã chọn
         if (userData.selectedInterestIds) setSelectedIds(userData.selectedInterestIds);
 
-        // 3. Set Profile Data (Mapping từ DB sang State)
+        // 3. Set Profile Data (Mapping từ DB snake_case sang State camelCase)
         if (userData.profile) {
           const p = userData.profile;
           setFormData({
             username: p.username || "User",
             email: p.email || "",
             bio: p.bio || "",
-            // Lưu ý: DB trả về snake_case (job_title), State dùng camelCase (jobTitle)
+            // Mapping quan trọng: DB trả về job_title -> State lưu jobTitle
             jobTitle: p.job_title || "", 
             company: p.company || "",
             education: p.education || "",
             gender: p.gender || "male",
-            // Cắt chuỗi ngày: 2000-01-01T00:00... -> 2000-01-01
-            birthDate: p.birth_date ? p.birth_date.toString().split('T')[0] : "",
+            // Xử lý ngày: Chuyển ISO string sang YYYY-MM-DD cho input date
+            birthDate: p.birth_date ? new Date(p.birth_date).toISOString().split('T')[0] : "",
+            // Giữ lại tọa độ cũ nếu có (để gửi lại nếu user không đổi vị trí)
+            // Lưu ý: Logic hiển thị lại vị trí cũ trên LocationPicker sẽ cần xử lý riêng nếu muốn, tạm thời ta chỉ lưu giá trị
+            latitude: null, 
+            longitude: null
           });
         }
       } catch (err) {
@@ -68,11 +76,24 @@ export default function EditProfile() {
   }, []);
 
   // --- HANDLERS ---
+  
+  // Xử lý nhập liệu text cơ bản
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Xử lý khi chọn vị trí từ LocationPicker
+  const handleLocationSelect = (locationData) => {
+    // locationData = { latitude, longitude, address }
+    setFormData(prev => ({
+        ...prev,
+        latitude: locationData.latitude,
+        longitude: locationData.longitude
+    }));
+  };
+
+  // Xử lý chọn/bỏ chọn sở thích
   const toggleInterest = (id) => {
     setSelectedIds((prev) => {
       if (prev.includes(id)) return prev.filter((item) => item !== id);
@@ -84,6 +105,7 @@ export default function EditProfile() {
     });
   };
 
+  // Gửi dữ liệu về Backend
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -98,6 +120,7 @@ export default function EditProfile() {
         fetch("http://localhost:4000/api/profile/update", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          // Gửi toàn bộ formData (đã bao gồm lat/long/jobTitle...)
           body: JSON.stringify({ userId, ...formData }),
         }),
         // 2. Lưu Sở thích
@@ -129,8 +152,7 @@ export default function EditProfile() {
             <h1 className="text-3xl font-bold text-gray-900">Edit Profile</h1>
             <p className="text-gray-500">Update your personal details</p>
           </div>
-          {/* Nút giả chuyển sang trang ảnh (Sau này dùng React Router Link) */}
-          <button className="flex items-center gap-2 bg-white text-pink-600 border border-pink-200 px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-pink-50 transition">
+          <button type="button" className="flex items-center gap-2 bg-white text-pink-600 border border-pink-200 px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-pink-50 transition">
             <Camera className="w-5 h-5" />
             Manage Photos
           </button>
@@ -204,6 +226,14 @@ export default function EditProfile() {
                   </div>
                </div>
 
+               {/* Location (Sử dụng Component LocationPicker) */}
+               <div>
+                 <LocationPicker onLocationSelect={handleLocationSelect} />
+                 <p className="text-xs text-gray-500 mt-2 ml-1">
+                   * Chọn địa điểm để tìm kiếm người phù hợp quanh bạn.
+                 </p>
+               </div>
+
                {/* Gender */}
                <div>
                  <label className="block text-sm font-semibold text-gray-700 mb-2">Gender</label>
@@ -238,7 +268,7 @@ export default function EditProfile() {
 
             <div className="space-y-6">
               {categories.map((cat) => (
-                cat.items.length > 0 && (
+                cat.items && cat.items.length > 0 && (
                   <div key={cat.category_id}>
                     <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
                        <span>{cat.icon}</span> {cat.category_name}
