@@ -1,75 +1,91 @@
-export default function UserDetailModal({ user, onClose, onBlock, onReport }) {
-    return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-pink-50 w-[360px] max-h-[85vh] p-6 rounded-2xl overflow-y-auto relative shadow-xl">
+export default function UserDetailModal({ user, onClose }) {
+  const age =
+    new Date().getFullYear() -
+    new Date(user.birth_date).getFullYear();
 
-                <button
-                    onClick={onClose}
-                    className="absolute top-3 right-3 text-pink-500 hover:text-pink-700 text-xl"
-                >
-                    ✖
-                </button>
+  return (
+    <div className="fixed inset-0 z-[999] bg-black/60 flex items-center justify-center">
+      <div className="bg-white w-[380px] max-h-[90vh] rounded-2xl overflow-y-auto shadow-2xl relative">
 
-                <h2 className="text-2xl font-bold mb-1">
-                    {user.name}, {user.age}
-                </h2>
+        {/* CLOSE */}
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 z-10 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow"
+        >
+          ✖
+        </button>
 
-                <p className="text-gray-600 mb-4">{user.bio}</p>
-
-                {/* Education */}
-                <div className="mb-4">
-                    <p className="font-semibold">🎓 Học vấn</p>
-                    <p>{user.edu}</p>
-                </div>
-
-                {/* Hobby */}
-                <div className="mb-4">
-                    <p className="font-semibold">✨ Sở thích</p>
-                    <p>{user.hobby}</p>
-                </div>
-
-                {/* Additional Photos */}
-                <div className="mb-4">
-                    <p className="font-semibold mb-2">📸 Ảnh khác</p>
-
-                    <div className="grid grid-cols-2 gap-2">
-                        {user.photos?.map((img, i) => (
-                            <img
-                                key={i}
-                                src={img}
-                                className="w-full h-28 object-cover rounded"
-                            />
-                        ))}
-                    </div>
-                </div>
-                {/* Actions */}
-                <div className="flex justify-between mt-8 gap-4">
-                    {/* Nút Chặn */}
-                    <button
-                        onClick={() => onBlock(user.id)}
-                        className="
-                            flex-1 px-3 py-2 rounded-full 
-                            bg-pink-100 text-pink-600 font-semibold 
-                            shadow-sm hover:bg-pink-200 
-                            transition-all
-                        ">
-                        Chặn
-                    </button>
-                    {/* Nút Báo cáo */}
-                    <button
-                        onClick={() => onReport(user.id)}
-                        className="
-                            flex-1 px-3 py-2 rounded-full 
-                            bg-white text-pink-500 font-semibold 
-                            border border-pink-300 
-                            shadow-sm hover:bg-pink-50
-                            transition-all
-                        "
-                    >
-                        Báo cáo
-                    </button>
-                </div>
-            </div>
+        {/* AVATAR */}
+        <div className="w-full h-[360px]">
+          <img
+            src={user.avatar || "https://via.placeholder.com/400"}
+            alt={user.username}
+            className="w-full h-full object-cover rounded-t-2xl"
+          />
         </div>
-    );
+
+        {/* CONTENT */}
+        <div className="p-5">
+          <h2 className="text-2xl font-bold mb-1">
+            {user.username}, {age}
+          </h2>
+
+          {user.bio && (
+            <p className="text-gray-600 mb-4">{user.bio}</p>
+          )}
+
+          {/* EDUCATION */}
+          <div className="mb-3">
+            <p className="font-semibold">🎓 Học vấn</p>
+            <p className="text-gray-700">
+              {user.education || "Chưa cập nhật"}
+            </p>
+          </div>
+
+          {/* JOB */}
+          <div className="mb-3">
+            <p className="font-semibold">💼 Công việc</p>
+            <p className="text-gray-700">
+              {user.job_title
+                ? `${user.job_title}${user.company ? " tại " + user.company : ""}`
+                : "Chưa cập nhật"}
+            </p>
+          </div>
+
+          {/* INTERESTS */}
+          {user.interests?.length > 0 && (
+            <div className="mb-4">
+              <p className="font-semibold mb-2">✨ Sở thích</p>
+              <div className="flex flex-wrap gap-2">
+                {user.interests.map((tag, i) => (
+                  <span
+                    key={i}
+                    className="px-3 py-1 bg-pink-100 text-pink-600 rounded-full text-sm"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* PHOTOS */}
+          {user.photos?.length > 1 && (
+            <div className="mt-4">
+              <p className="font-semibold mb-2">📸 Ảnh khác</p>
+              <div className="grid grid-cols-2 gap-2">
+                {user.photos.slice(1).map((img, i) => (
+                  <img
+                    key={i}
+                    src={img}
+                    className="w-full h-32 object-cover rounded-lg"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
