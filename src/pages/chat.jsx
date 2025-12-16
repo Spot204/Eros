@@ -8,7 +8,7 @@ import { useChat } from "../hooks/useChat";
 function Chat() {
   // Lấy userId + token thật từ Auth (sau này bạn sẽ có)
 
-  const currentUserId = 2; // Anna
+  const currentUserId = 1; // Anna
   // const currentUserId = 3; // David
 
   const {
@@ -67,6 +67,7 @@ function Chat() {
         matches={matches}
         selectedMatchId={selectedMatchId}
         onSelectMatch={handleSelectMatch}
+        currentId={currentUserId}
       />
       {/* Window chat */}
       {selectedMatchId ? (

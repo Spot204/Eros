@@ -39,7 +39,7 @@ const requireUser = (req, res, next) => {
 };
 
 // ==================== REST API ====================
-app.get('/api/matches', requireUser, async (req, res) => {
+app.get('/api/matches',requireUser, async (req, res) => {
   const userId = req.user.id;
   const query = `
     SELECT 
