@@ -6,7 +6,7 @@ import { AuthDialog } from "../components/authDialog";
 
 const Auth = () => {
   const [authOpen, setAuthOpen] = React.useState(false);
-  const [authMode, setAuthMode] = useState("login"); // "login" hoặc "register"
+  const [authMode, setAuthMode] = useState(""); // "login" hoặc "register"
 
   return (
     <div className="overflow-hidden">
