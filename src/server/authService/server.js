@@ -125,8 +125,7 @@ app.post(
       // Có thể lưu session vào Redis
       await redisClient.set(
         `auth:${user.id}`,
-        token,
-        { EX: 60 * 60 * 24 * 7 }
+        token
       );
 
       return res.json({
