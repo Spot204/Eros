@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   postgres:
     image: postgis/postgis:16-3.4-alpine
@@ -50,7 +52,7 @@ services:
     restart: always
 
   auth-service:
-    build: ./src/server/ProfileService
+    build: ./src/server/authService
     container_name: eros-auth
     ports:
       - "8007:8007"
@@ -63,8 +65,19 @@ services:
       - postgres
     restart: always
     env_file:
-      - .env
+      - ./src/server/authService/.env
+
+  match-service:
+    build: ./backend/matchservice_hoa
+    container_name: eros-match
+    ports:
+      - "8006:8006"
+    depends_on:
+      - postgres
+      - redis
+    restart: always
+    env_file:
+      - ./backend/matchservice_hoa/.env
 
 volumes:
   postgres_data:
-  # ... (Phần postgres, redis, chat-service giữ nguyên y hệt cũ)

@@ -17,8 +17,11 @@ app.use(express.json());
 
 // DB + Redis
 const pg = new Pool({
-  user: 'postgres', host: 'eros-postgres', database: 'eros',
-  password: '123456', port: 5432
+  user: 'postgres', 
+  host: 'eros-postgres', 
+  database: 'eros',
+  password: '123456', 
+  port: 5432
 });
 const redis = Redis.createClient({ url: 'redis://eros-redis:6379' });
 redis.connect();
@@ -123,7 +126,7 @@ app.put('/api/matches/:matchId/read', requireUser, async (req, res) => {
 
   await pg.query(
     `UPDATE messages SET read_at = NOW()
-     WHERE match_id = $1 AND from_user_id != $1 AND read_at IS NULL`,
+     WHERE match_id = $1 AND from_user_id != $2 AND read_at IS NULL`,
     [matchId, userId]
   );
   io.to(`match_${matchId}`).emit('messages_read', { matchId });

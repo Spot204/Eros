@@ -44,7 +44,7 @@ function Chat() {
     await loadMessages(matchId);
 
     // 2. Đánh dấu đã đọc (tick xanh cho đối phương)
-    markAsRead(matchId);
+    markAsRead(matchId, currentUserId);
   };
 
   // Kiểm tra người đang gõ trong match hiện tại

@@ -105,7 +105,7 @@ export default function CreateProfile() {
 
     setLoading(true);
     try {
-        const userId = 1; // Hardcode user 1
+        const userId = localStorage.userId; // Hardcode user 1
 
         // Gọi API Backend
         const res = await fetch("http://localhost:4000/api/profile/update", {
@@ -124,7 +124,7 @@ export default function CreateProfile() {
         
         // Thành công -> Chuyển sang trang tiếp theo (VD: Upload Ảnh hoặc Chọn Sở thích)
         // Bạn đổi đường dẫn này theo router thực tế của bạn nhé
-        navigate("/manage-photo"); 
+        navigate("/preferences"); 
 
     } catch (err) {
         console.error(err);

@@ -1,15 +1,23 @@
 import { useState, useEffect } from "react";
 import { Button } from "../components/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../components/dialog";
 import { DialogDescription } from "@radix-ui/react-dialog";
+import { useNavigate } from "react-router-dom";
 
 export function AuthDialog({ open, onOpenChange, defaultMode = "login" }) {
+  const navigate = useNavigate();
   const [mode, setMode] = useState(defaultMode);
   const isLogin = mode === "login";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [user_id, setuser_id] = useState("");
 
   useEffect(() => {
     if (open) {
@@ -19,6 +27,21 @@ export function AuthDialog({ open, onOpenChange, defaultMode = "login" }) {
 
   const toggleMode = () => {
     setMode(isLogin ? "register" : "login");
+  };
+
+  const hanleCheckAccount = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch("http://localhost:8007/api/auth/login", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(user_id),
+      });
+      return res;
+    } catch (err) {
+      console.error("Lỗi mạng:", err);
+      alert("Lỗi mạng, vui lòng thử lại sau.");
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -45,7 +68,7 @@ export function AuthDialog({ open, onOpenChange, defaultMode = "login" }) {
       });
 
       const data = await res.json();
-
+      setuser_id(data.userID);
       if (!res.ok) {
         alert(data.message || "Có lỗi xảy ra");
         return;
@@ -54,6 +77,13 @@ export function AuthDialog({ open, onOpenChange, defaultMode = "login" }) {
       if (isLogin) {
         localStorage.setItem("token", data.token);
         onOpenChange(false);
+        const res = hanleCheckAccount();
+        if(res.message =="have profile"){
+          navigate("/home");
+        }else{
+          navigate("/create-profile")
+        }
+        
       } else {
         alert("Đăng ký thành công! Vui lòng đăng nhập.");
         setMode("login");
