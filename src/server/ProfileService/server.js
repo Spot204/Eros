@@ -88,15 +88,28 @@ app.get('/api/profile/:userId', async (req, res) => {
   }
 });
 
-// 🔵 API 3: Lưu/Cập nhật thông tin cá nhân (Bio, Job, Location...)
+// 🔵 API 3: Lưu/Cập nhật thông tin cá nhân
 app.post('/api/profile/update', async (req, res) => {
-  const { userId = 1, bio, jobTitle, company, education, birthDate, gender, location } = req.body;
+  // Thêm latitude, longitude vào body nhận về
+  const { userId = 1, bio, jobTitle, company, education, birthDate, gender, latitude, longitude } = req.body;
 
   try {
-    // Dùng ON CONFLICT để: Chưa có thì Thêm, Có rồi thì Sửa (Upsert)
+    // Logic: Nếu có lat/long thì dùng ST_SetSRID(ST_MakePoint(long, lat), 4326)
+    // Lưu ý: PostGIS nhận (Longitude, Latitude) - Đừng ngược nhé!
+    
+    let locationSQL = 'location'; // Giữ nguyên cũ nếu không có tọa độ
+    let params = [userId, bio, jobTitle, company, education, birthDate, gender];
+
+    if (latitude && longitude) {
+        // Param thứ 8 và 9
+        locationSQL = `ST_SetSRID(ST_MakePoint($8, $9), 4326)`; 
+        params.push(longitude); // $8
+        params.push(latitude);  // $9
+    }
+
     const query = `
-      INSERT INTO profiles (user_id, bio, job_title, company, education, birth_date, gender)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      INSERT INTO profiles (user_id, bio, job_title, company, education, birth_date, gender, location)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, ${latitude && longitude ? locationSQL : 'NULL'})
       ON CONFLICT (user_id) 
       DO UPDATE SET 
         bio = EXCLUDED.bio,
@@ -105,11 +118,12 @@ app.post('/api/profile/update', async (req, res) => {
         education = EXCLUDED.education,
         birth_date = EXCLUDED.birth_date,
         gender = EXCLUDED.gender,
+        ${latitude && longitude ? `location = ${locationSQL},` : ''} -- Chỉ update location nếu có gửi lên
         updated_at = NOW()
       RETURNING *;
     `;
-    // Lưu ý: Phần Location (GPS) cần xử lý riêng nếu có, ở đây tạm thời bỏ qua trường location text
-    const result = await pool.query(query, [userId, bio, jobTitle, company, education, birthDate, gender]);
+    
+    const result = await pool.query(query, params);
     res.json({ success: true, profile: result.rows[0] });
   } catch (err) {
     console.error(err);

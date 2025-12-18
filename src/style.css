@@ -87,7 +87,7 @@
 }
 
 .hero-title {
-	font-size: 96px;
+	font-size: 108px;
 	line-height: 0.9;
 	margin: 0 0 12px 0;
 	font-weight: 800;
@@ -95,9 +95,9 @@
 }
 
 .hero-sub {
-	margin: 0 0 28px 0;
+	margin: 20px 10px;
 	color: rgba(255,255,255,0.9);
-	font-size: 18px;
+	font-size: 20px;
 }
 
 .hero-cta {
@@ -111,11 +111,6 @@
 	font-weight: 600;
 	cursor: pointer;
 	border: none;
-}
-
-.btn.primary {
-	background: linear-gradient(90deg,#ff4d7e,#ff6a9b);
-	color: #fff;
 }
 
 .btn.ghost {

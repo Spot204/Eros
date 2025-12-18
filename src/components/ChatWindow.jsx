@@ -56,9 +56,6 @@ function ChatWindow({
               }`}
             >
               {msg.content || "[ảnh]"}
-              {msg.read_at && msg.partner_id != currentUserId && (
-                <span className="block text-xs opacity-70 mt-1 text-right">đã xem</span>
-              )}
             </div>
           </div>
         ))}

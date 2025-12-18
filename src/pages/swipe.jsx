@@ -320,7 +320,7 @@ function Modal({ title, children, onClose }) {
 /* ---------- MATCH POPUP ---------- */
 function MatchPopup({ onChat, onClose }) {
   return (
-    <div className="fixed inset-0 bg-black/70 z-[9999] flex items-center justify-center">
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center">
       <div className="bg-white rounded-2xl p-6 text-center w-80">
         <h2 className="text-2xl font-bold mb-4">💖 It’s a Match!</h2>
 
