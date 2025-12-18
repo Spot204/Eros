@@ -24,7 +24,6 @@ const Auth = () => {
             </div>
           </div>
         </main>
-
         <AuthDialog
           open={authOpen}
           onOpenChange={setAuthOpen}

@@ -15,7 +15,7 @@ const header = () => {
   }
 
   const handleClickProfile = () => {
-    navigate("/profile");
+    navigate("/edit-profile");
   }
 
   const handleClickLogout = () => {

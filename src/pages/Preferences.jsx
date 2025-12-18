@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { Save, AlertCircle } from "lucide-react"; 
+import { useNavigate } from "react-router-dom";
 
 export default function Preferences() {
+  const navigate = useNavigate();
   const [prefs, setPrefs] = useState({
     interested_in: "everyone",
     age_min: 18,
@@ -22,7 +24,7 @@ export default function Preferences() {
   useEffect(() => {
     const fetchData = async () => {
         try {
-            const userId = 1; // Mặc định user 1
+            const userId = localStorage.userId; 
 
             // Gọi song song 2 API để tiết kiệm thời gian
             const [metaRes, profileRes] = await Promise.all([
@@ -103,7 +105,7 @@ export default function Preferences() {
     }
 
     try {
-      const userId = 1; 
+      const userId = location.userId; 
 
       // Gọi API song song: Lưu Prefs và Lưu Interests cùng lúc
       const [prefRes, intRes] = await Promise.all([
@@ -127,6 +129,7 @@ export default function Preferences() {
 
       // Thành công
       setMessage({ type: "success", text: "Đã lưu cài đặt thành công!" });
+      navigate("/manage-photo")
       
     } catch (err) {
       console.error(err);

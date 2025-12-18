@@ -34,12 +34,7 @@ function App() {
             </MainLayout>
           }
         />
-        <Route
-          path="/Preferences"
-          element={
-            <Preferences/>
-          }
-        />
+        <Route path="/preferences" element={<Preferences />} />
         <Route
           path="/chat"
           element={
@@ -48,14 +43,7 @@ function App() {
             </MainLayout>
           }
         />
-        <Route
-          path="/create-profile"
-          element={
-            <MainLayout>
-              <CreateProfile />
-            </MainLayout>
-          }
-        />
+        <Route path="/create-profile" element={<CreateProfile />} />
         <Route
           path="/edit-profile"
           element={
@@ -64,14 +52,7 @@ function App() {
             </MainLayout>
           }
         />
-        <Route
-          path="/manage-photo"
-          element={
-            <MainLayout>
-              <ManagePhoto />
-            </MainLayout>
-          }
-        />
+        <Route path="/manage-photo" element={<ManagePhoto />} />
       </Routes>
     </Router>
   );
