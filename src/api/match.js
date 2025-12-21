@@ -13,3 +13,11 @@ export const swipe = (fromUserId, toUserId, action) =>
     to_user_id: toUserId,
     action
   });
+
+export const getLikedMe = (userId) =>
+  axios.get(`${BASE}/liked-me`, {
+    params: { user_id: userId },
+  });
+
+export const getAllInterests = () =>
+  axios.get(`${BASE}/interests`);
