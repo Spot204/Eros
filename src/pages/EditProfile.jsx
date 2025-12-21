@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Camera, Save, AlertCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 // Đảm bảo bạn đã tạo file LocationPicker.jsx trong folder components như hướng dẫn trước
 import LocationPicker from "../components/LocationPicker"; 
 
@@ -24,6 +25,7 @@ export default function EditProfile() {
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
+  const navigate = useNavigate();
 
   // --- 1. LOAD DATA KHI VÀO TRANG ---
   useEffect(() => {
@@ -152,7 +154,7 @@ export default function EditProfile() {
             <h1 className="text-3xl font-bold text-gray-900">Edit Profile</h1>
             <p className="text-gray-500">Update your personal details</p>
           </div>
-          <button type="button" className="flex items-center gap-2 bg-white text-pink-600 border border-pink-200 px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-pink-50 transition">
+          <button type="button" className="flex cursor-pointer items-center gap-2 bg-white text-pink-600 border border-pink-200 px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-pink-50 transition" onClick={() => navigate("/manage-photos")}>
             <Camera className="w-5 h-5" />
             Manage Photos
           </button>
