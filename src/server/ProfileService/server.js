@@ -1,8 +1,9 @@
 // src/server/ProfileService/server.js
-const express = require('express');
-const cors = require('cors');
-const { Pool } = require('pg');
-require('dotenv').config();
+import express from 'express';
+import cors from 'cors';
+import { Pool } from 'pg';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
 const PORT = 4000;
