@@ -28,7 +28,7 @@ services:
     restart: always
 
   chat-service:
-    build: ./src/server/chatService
+    build: ./src/server/chatService_baanh
     container_name: eros-chat
     ports:
       - "8005:8005"
