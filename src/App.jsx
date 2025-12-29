@@ -52,11 +52,15 @@ function App() {
             </MainLayout>
           }
         />
-        <Route path="/manage-photos" element={
-          <MainLayout>
-            <ManagePhoto />
-          </MainLayout>
-        } />
+        <Route path="/manage-photos" element={<ManagePhoto />} />
+        <Route
+          path="/manage-photos2"
+          element={
+            <MainLayout>
+              <ManagePhoto />
+            </MainLayout>
+          }
+        />
       </Routes>
     </Router>
   );

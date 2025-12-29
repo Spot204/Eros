@@ -1,12 +1,10 @@
 export default function UserDetailModal({ user, onClose }) {
   const age =
-    new Date().getFullYear() -
-    new Date(user.birth_date).getFullYear();
+    new Date().getFullYear() - new Date(user.birth_date).getFullYear();
 
   return (
     <div className="fixed inset-0 z-[999] bg-black/60 flex items-center justify-center">
       <div className="bg-white w-[380px] max-h-[90vh] rounded-2xl overflow-y-auto shadow-2xl relative">
-
         {/* CLOSE */}
         <button
           onClick={onClose}
@@ -18,9 +16,18 @@ export default function UserDetailModal({ user, onClose }) {
         {/* AVATAR */}
         <div className="w-full h-[360px]">
           <img
-            src={user.avatar || "https://via.placeholder.com/400"}
+            src={
+              user.avatar
+                ? `http://localhost:8008${user.avatar}` // Nối link server nếu có ảnh
+                : "https://placehold.co/400x600?text=No+Image" // Ảnh dự phòng nếu avatar bị null
+            }
             alt={user.username}
-            className="w-full h-full object-cover rounded-t-2xl"
+            className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+            // Trường hợp file ảnh trên server bị xóa mất nhưng link vẫn còn trong DB
+            onError={(e) => {
+              e.target.src =
+                "https://placehold.co/400x600?text=Error+Loading+Image";
+            }}
           />
         </div>
 
@@ -30,16 +37,12 @@ export default function UserDetailModal({ user, onClose }) {
             {user.username}, {age}
           </h2>
 
-          {user.bio && (
-            <p className="text-gray-600 mb-4">{user.bio}</p>
-          )}
+          {user.bio && <p className="text-gray-600 mb-4">{user.bio}</p>}
 
           {/* EDUCATION */}
           <div className="mb-3">
             <p className="font-semibold">🎓 Học vấn</p>
-            <p className="text-gray-700">
-              {user.education || "Chưa cập nhật"}
-            </p>
+            <p className="text-gray-700">{user.education || "Chưa cập nhật"}</p>
           </div>
 
           {/* JOB */}
@@ -47,7 +50,9 @@ export default function UserDetailModal({ user, onClose }) {
             <p className="font-semibold">💼 Công việc</p>
             <p className="text-gray-700">
               {user.job_title
-                ? `${user.job_title}${user.company ? " tại " + user.company : ""}`
+                ? `${user.job_title}${
+                    user.company ? " tại " + user.company : ""
+                  }`
                 : "Chưa cập nhật"}
             </p>
           </div>

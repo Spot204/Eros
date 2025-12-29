@@ -29,17 +29,20 @@ export function AuthDialog({ open, onOpenChange, defaultMode = "login" }) {
     setMode(isLogin ? "register" : "login");
   };
 
-  const hanleCheckAccount = async (e) => {
+  const hanleCheckAccount = async (e, userId) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:8007/api/auth/login", {
-        method: "GET",
+      const res = await fetch("http://localhost:8007/api/auth/check", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(user_id),
+        body: JSON.stringify({ userId: userId }),
       });
-      return res;
+      if (!res.ok) {
+        const errorText = await res.text();
+        return null;
+      }
+      return res.json();
     } catch (err) {
-      console.error("Lỗi mạng:", err);
       alert("Lỗi mạng, vui lòng thử lại sau.");
     }
   };
@@ -57,8 +60,8 @@ export function AuthDialog({ open, onOpenChange, defaultMode = "login" }) {
       : "http://localhost:8007/api/auth/register";
 
     const payload = isLogin
-      ? { email, password }
-      : { username, email, password };
+      ? { email: email, password: password }
+      : { username: username, email: email, password: password };
 
     try {
       const res = await fetch(url, {
@@ -68,28 +71,25 @@ export function AuthDialog({ open, onOpenChange, defaultMode = "login" }) {
       });
 
       const data = await res.json();
-      setuser_id(data.userID);
-      if (!res.ok) {
-        alert(data.message || "Có lỗi xảy ra");
-        return;
-      }
 
-      if (isLogin) {
-        localStorage.setItem("token", data.token);
-        onOpenChange(false);
-        const res = hanleCheckAccount();
-        if(res.message =="have profile"){
+      if (res.ok && isLogin) {
+        const freshUserID = data.userID; // Đây là biến tạm chắc chắn có dữ liệu
+        localStorage.setItem("userID", freshUserID); // Lưu vào bộ nhớ trình duyệt
+        setuser_id(freshUserID); // Lưu vào state (để dùng cho các component khác sau này)
+        const checkRes = await hanleCheckAccount(e, freshUserID);
+        // BƯỚC 4: Đợi check profile xong mới điều hướng
+        if (checkRes && checkRes.message === "have profile") {
           navigate("/home");
-        }else{
-          navigate("/create-profile")
+        } else {
+          navigate("/create-profile");
         }
-        
       } else {
         alert("Đăng ký thành công! Vui lòng đăng nhập.");
-        setMode("login");
+        // Tự động chuyển sang chế độ đăng nhập để người dùng nhập pass
+        setIsLogin(true);
+        // Hoặc nếu backend của bạn tự động log in sau khi regis thì làm giống logic isLogin
       }
     } catch (err) {
-      console.error("Lỗi mạng:", err);
       alert("Lỗi mạng, vui lòng thử lại sau.");
     }
   };

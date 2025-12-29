@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   postgres:
@@ -26,19 +26,8 @@ services:
     ports:
       - "6379:6379"
     restart: always
-
-  chat-service:
-    build: ./src/server/chatService_baanh
-    container_name: eros-chat
-    ports:
-      - "8005:8005"
-    depends_on:
-      - postgres
-      - redis
-    restart: always
-
   profile-service:
-    build: ./src/server/ProfileService
+    build: ./src/server/ProfileService_nam
     container_name: eros-profile
     ports:
       - "4000:4000"
@@ -50,22 +39,15 @@ services:
     depends_on:
       - postgres
     restart: always
-
-  auth-service:
-    build: ./src/server/authService
-    container_name: eros-auth
+  chat-service:
+    build: ./src/server/chatService_baanh
+    container_name: eros-chat
     ports:
-      - "8007:8007"
-    environment:
-      DB_HOST: postgres
-      DB_USER: postgres
-      DB_PASS: 123456
-      DB_NAME: eros
+      - "8005:8005"
     depends_on:
       - postgres
+      - redis
     restart: always
-    env_file:
-      - ./src/server/authService/.env
 
   match-service:
     build: ./backend/matchservice_hoa
@@ -78,6 +60,33 @@ services:
     restart: always
     env_file:
       - ./backend/matchservice_hoa/.env
+  auth-service:
+    build: ./src/server/authService_bach
+    container_name: eros-auth
+    ports:
+      - "8007:8007"
+    environment:
+      DB_HOST: postgres
+      DB_USER: postgres
+      DB_PASS: 123456
+      DB_NAME: eros
+    depends_on:
+      - postgres
+    restart: always
+    env_file:
+      - ./src/server/authService_bach/.env
 
+  photo-server:
+    build: ./src/server/photoService_bach
+    container_name: eros-photo
+    ports:
+      - "8008:8008"
+    depends_on:
+      - postgres
+    volumes:
+      - eros_uploads:/app/uploads
+    restart: always
 volumes:
   postgres_data:
+  eros_uploads:
+  

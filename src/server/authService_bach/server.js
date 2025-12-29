@@ -111,17 +111,17 @@ app.post(
         return res.status(401).json({ message: "Sai email hoặc mật khẩu" });
       }
 
-      // Tạo JWT
-      const token = jwt.sign({ userId: user.userid }, JWT_SECRET, {
-        expiresIn: "7d",
-      });
+      // // Tạo JWT
+      // const token = jwt.sign({ userId: user.userid }, JWT_SECRET, {
+      //   expiresIn: "7d",
+      // });
 
-      // Có thể lưu session vào Redis
-      await redisClient.set(`auth:${user.id}`, token, { EX: 60 * 60 * 24 * 7 });
+      // // Có thể lưu session vào Redis
+      // await redisClient.set(`auth:${user.id}`, token, { EX: 60 * 60 * 24 * 7 });
 
       return res.json({
         message: "Đăng nhập thành công",
-        token,
+        userID: user.user_id,
       });
     } catch (err) {
       console.error(err);
@@ -129,19 +129,27 @@ app.post(
     }
   }
 );
-app.get("/api/auth/check", async (req, res) => {
-  const userId = req.body.userId;
-  const query = `SELECT * FROM profiles WHERE user_id = $1`;
+app.post("/api/auth/check", async (req, res) => {
+  try {
+    const { userId } = req.body;
 
-  const result = await pgClient.query(query, [userId]);
-  if (result.rowCount > 0) {
-    res.status(200).json({
-      message: "have profile",
-    });
-  } else {
-    res.status(200).json({
-      message: "have not profile",
-    });
+    // 1. Kiểm tra nếu userId bị thiếu
+    if (!userId) {
+      return res.status(400).json({ message: "userId is required" });
+    }
+
+    const query = `SELECT 1 FROM profiles WHERE user_id = $1`; // Chỉ cần SELECT 1 để tối ưu tốc độ
+    const result = await pgClient.query(query, [userId]);
+
+    if (result.rowCount > 0) {
+      return res.status(200).json({ message: "have profile" });
+    } else {
+      return res.status(200).json({ message: "have not profile" });
+    }
+  } catch (err) {
+    // 2. Bắt lỗi nếu Database có vấn đề
+    console.error("Database Error:", err);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 });
 

@@ -6,7 +6,7 @@ import {
   getRecommendations,
   swipe as swipeApi,
   getLikedMe,
-  getAllInterests
+  getAllInterests,
 } from "../api/match";
 
 export default function Swipe() {
@@ -24,7 +24,7 @@ export default function Swipe() {
   const [showFilter, setShowFilter] = useState(false);
   const [filter, setFilter] = useState({
     maxDistance: 10,
-    interests: []
+    interests: [],
   });
 
   const [showMatchPopup, setShowMatchPopup] = useState(false);
@@ -33,7 +33,7 @@ export default function Swipe() {
   const cardRefs = useRef([]);
   const navigate = useNavigate();
 
-  const currentUserId = 1;
+  const currentUserId = localStorage.getItem("userID");
 
   // ---- LOAD GỢI Ý ----
   const loadNextUser = async () => {
@@ -50,8 +50,8 @@ export default function Swipe() {
     loadNextUser();
 
     getAllInterests()
-      .then(res => setAllInterests(res.data))
-      .catch(err => console.error("❌ load interests error", err));
+      .then((res) => setAllInterests(res.data))
+      .catch((err) => console.error("❌ load interests error", err));
   }, []);
 
   // ---- SWIPE ----
@@ -62,9 +62,7 @@ export default function Swipe() {
   ) => {
     try {
       const action =
-        direction === "right" || direction === "LIKE"
-          ? "LIKE"
-          : "PASS";
+        direction === "right" || direction === "LIKE" ? "LIKE" : "PASS";
 
       const res = await swipeApi(currentUserId, targetId, action);
 
@@ -77,14 +75,10 @@ export default function Swipe() {
       // ---- SWIPE TỪ LIKED ME ----
       if (options.fromLikedMe) {
         // 1️⃣ XÓA KHỎI Liked Me
-        setLikedMeUsers((prev) =>
-          prev.filter((u) => u.user_id !== targetId)
-        );
+        setLikedMeUsers((prev) => prev.filter((u) => u.user_id !== targetId));
 
         // XÓA KHỎI STACK SWIPE
-        setUsers((prev) =>
-          prev.filter((u) => u.user_id !== targetId)
-        );
+        setUsers((prev) => prev.filter((u) => u.user_id !== targetId));
 
         setSelectedUser(null);
         setDetailUser(null);
@@ -109,14 +103,14 @@ export default function Swipe() {
 
   /* ---------------- Liked Me ---------------- */
   const loadLikedMe = async () => {
-  try {
-    const res = await getLikedMe(currentUserId);
-    setLikedMeUsers(res.data);
-    setShowLikedMe(true);
-  } catch (err) {
-    console.error("❌ loadLikedMe error:", err.response?.data || err.message);
-  }
-};
+    try {
+      const res = await getLikedMe(currentUserId);
+      setLikedMeUsers(res.data);
+      setShowLikedMe(true);
+    } catch (err) {
+      console.error("❌ loadLikedMe error:", err.response?.data || err.message);
+    }
+  };
 
   /* ---------------- APPLY FILTER ---------------- */
   const applyFilter = () => {
@@ -125,8 +119,7 @@ export default function Swipe() {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100 relative">
-    
+    <div className="flex items-center justify-center h-[89.5vh] bg-gray-100 relative">
       {/* ---------- TOP RIGHT BUTTONS ---------- */}
       <div className="absolute top-4 right-6 flex gap-3 z-50">
         <button
@@ -143,27 +136,31 @@ export default function Swipe() {
           🔍
         </button>
       </div>
-      
+
       {/* ------ STACK SWIPE CARDS ------ */}
-      {users
-        .slice(activeIndex, activeIndex + 3)
-        .map((user, i) => (
-          <SwipeCard
-            key={user.user_id}
-            user={user}
-            zIndex={100 - i}
-            onSwipe={handleSwipe}
-            onShowDetail={() => setDetailUser(user)}
-            ref={(el) => (cardRefs.current[i] = el)}
-          />
-        ))}
+      {users.slice(activeIndex, activeIndex + 3).map((user, i) => (
+        <SwipeCard
+          key={user.user_id}
+          user={user}
+          zIndex={100 - i}
+          onSwipe={handleSwipe}
+          onShowDetail={() => setDetailUser(user)}
+          ref={(el) => (cardRefs.current[i] = el)}
+        />
+      ))}
 
       {/* ------ NÚT SWIPE ------ */}
       <div className="absolute bottom-10 flex gap-12">
-        <button onClick={swipeLeft} className="w-12 h-12 bg-white rounded-full shadow-md border flex items-center justify-center hover:scale-110 transition">
+        <button
+          onClick={swipeLeft}
+          className="w-12 h-12 bg-white rounded-full shadow-md border flex items-center justify-center hover:scale-110 transition"
+        >
           ✖
         </button>
-        <button onClick={swipeRight} className="w-12 h-12 bg-white rounded-full shadow-md border flex items-center justify-center hover:scale-110 transition">
+        <button
+          onClick={swipeRight}
+          className="w-12 h-12 bg-white rounded-full shadow-md border flex items-center justify-center hover:scale-110 transition"
+        >
           ❤️
         </button>
       </div>
@@ -203,10 +200,7 @@ export default function Swipe() {
           onClose={() => setSelectedUser(null)}
         >
           <div className="space-y-4">
-            <img
-              src={selectedUser.avatar}
-              className="rounded-xl w-full"
-            />
+            <img src={selectedUser.avatar} className="rounded-xl w-full" />
 
             <p className="text-sm text-gray-600">{selectedUser.bio}</p>
 
@@ -216,7 +210,7 @@ export default function Swipe() {
                 className="px-4 py-2 bg-gray-300 rounded-lg"
                 onClick={() =>
                   handleSwipe(selectedUser.user_id, "left", {
-                    fromLikedMe: true
+                    fromLikedMe: true,
                   })
                 }
               >
@@ -227,7 +221,7 @@ export default function Swipe() {
                 className="px-4 py-2 bg-pink-500 text-white rounded-lg"
                 onClick={() =>
                   handleSwipe(selectedUser.user_id, "right", {
-                    fromLikedMe: true
+                    fromLikedMe: true,
                   })
                 }
               >
@@ -249,9 +243,7 @@ export default function Swipe() {
                   <input
                     type="radio"
                     checked={filter.maxDistance === km}
-                    onChange={() =>
-                      setFilter({ ...filter, maxDistance: km })
-                    }
+                    onChange={() => setFilter({ ...filter, maxDistance: km })}
                   />{" "}
                   Dưới {km} km
                 </label>
@@ -268,8 +260,12 @@ export default function Swipe() {
                       type="checkbox"
                       checked={filter.interests.includes(it.interest_id)}
                       onChange={() => {
-                        const selected = filter.interests.includes(it.interest_id)
-                          ? filter.interests.filter(id => id !== it.interest_id)
+                        const selected = filter.interests.includes(
+                          it.interest_id
+                        )
+                          ? filter.interests.filter(
+                              (id) => id !== it.interest_id
+                            )
                           : [...filter.interests, it.interest_id];
 
                         setFilter({ ...filter, interests: selected });
@@ -294,7 +290,7 @@ export default function Swipe() {
       {/* ----- MATCH POPUP ----- */}
       {showMatchPopup && (
         <MatchPopup
-          onChat={() => navigate(`/chat/${matchId}`)}
+          onChat={() => navigate(`/chats`)}
           onClose={() => setShowMatchPopup(false)}
         />
       )}

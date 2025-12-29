@@ -60,11 +60,12 @@ const SwipeCard = forwardRef(({ user, zIndex, onSwipe, onShowDetail }, ref) => {
       onTouchMove={handleMove}
       onTouchEnd={handleEnd}
     >
-      <img
-        src={user.avatar || "https://via.placeholder.com/400"}
-        alt={user.username}
-        className="w-full h-full object-cover"
-      />
+      <img 
+  src={user.avatar ? `http://localhost:8008${user.avatar}` : "https://placehold.co/400x600?text=No+Image"} 
+  alt={user.username}
+  // Thêm onError để phòng trường hợp link ảnh từ server bị hỏng
+  onError={(e) => { e.target.src = "https://placehold.co/400x600?text=Error" }}
+/>
 
       <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/60 to-transparent text-white">
         <h2 className="text-xl font-semibold">

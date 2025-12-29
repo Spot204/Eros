@@ -8,26 +8,26 @@ import { useChat } from "../hooks/useChat";
 function Chat() {
   // Lấy userId + token thật từ Auth (sau này bạn sẽ có)
 
-  const currentUserId = 1; // Anna
+  const currentUserId = localStorage.getItem("userID"); // Anna
   // const currentUserId = 3; // David
 
   const {
-    matches, 
+    matches,
     loadMatches,
-    messages, 
+    messages,
     loadMessages,
-    sendMessage, 
-    sendTyping, 
-    joinMatch, 
+    sendMessage,
+    sendTyping,
+    joinMatch,
     markAsRead,
     addOptimisticMessage,
-    typing
+    typing,
   } = useChat(currentUserId);
 
   const [selectedMatchId, setSelectedMatchId] = useState(null);
 
   // Lấy tên đối phương từ matches
-  const selectedMatch = matches.find(m => m.match_id === selectedMatchId);
+  const selectedMatch = matches.find((m) => m.match_id === selectedMatchId);
   const opponentName = selectedMatch?.partner_name || "Đang tải...";
   const opponentAvatar = selectedMatch?.avatar || "/default-avatar.png";
 
@@ -48,9 +48,7 @@ function Chat() {
   };
 
   // Kiểm tra người đang gõ trong match hiện tại
-  const typingInCurrentMatch = selectedMatchId
-    ? typing[selectedMatchId]
-    : null;
+  const typingInCurrentMatch = selectedMatchId ? typing[selectedMatchId] : null;
 
   if (!currentUserId) {
     return (
@@ -85,9 +83,7 @@ function Chat() {
           addOptimisticMessage={(content) =>
             addOptimisticMessage(selectedMatchId, content)
           }
-          sendTyping={(isTyping) =>
-            sendTyping(selectedMatchId, isTyping)
-          }
+          sendTyping={(isTyping) => sendTyping(selectedMatchId, isTyping)}
         />
       ) : (
         <div className="flex-1 flex items-center justify-center text-gray-500 text-xl">

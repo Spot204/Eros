@@ -37,7 +37,6 @@ export const useChat = (userId) => {
     const socket = socketRef.current;
 
     socket.on("connect", () => {
-      console.log("Socket connected, gửi userId:", userId);
       socket.emit("join", userId); // server bắt buộc phải có
     });
     

@@ -31,7 +31,7 @@ export default function EditProfile() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const userId = 1; // Hardcode user 1 (Sau này lấy từ Token/AuthContext)
+        const userId = localStorage.getItem("userID"); // Hardcode user 1 (Sau này lấy từ Token/AuthContext)
 
         // Gọi 2 API song song: Metadata (Menu sở thích) và Profile hiện tại
         const [metaRes, profileRes] = await Promise.all([
@@ -52,14 +52,14 @@ export default function EditProfile() {
         if (userData.profile) {
           const p = userData.profile;
           setFormData({
-            username: p.username || "User",
+            username: p.username || "",
             email: p.email || "",
             bio: p.bio || "",
             // Mapping quan trọng: DB trả về job_title -> State lưu jobTitle
             jobTitle: p.job_title || "", 
             company: p.company || "",
             education: p.education || "",
-            gender: p.gender || "male",
+            gender: p.gender || "",
             // Xử lý ngày: Chuyển ISO string sang YYYY-MM-DD cho input date
             birthDate: p.birth_date ? new Date(p.birth_date).toISOString().split('T')[0] : "",
             // Giữ lại tọa độ cũ nếu có (để gửi lại nếu user không đổi vị trí)
@@ -67,6 +67,7 @@ export default function EditProfile() {
             latitude: null, 
             longitude: null
           });
+
         }
       } catch (err) {
         console.error(err);
@@ -114,7 +115,7 @@ export default function EditProfile() {
     setMessage(null);
 
     try {
-      const userId = 1;
+      const userId = localStorage.getItem("userID");
 
       // Gọi 2 API song song: Update Profile & Update Interests
       const [profileRes, interestRes] = await Promise.all([
@@ -154,7 +155,7 @@ export default function EditProfile() {
             <h1 className="text-3xl font-bold text-gray-900">Edit Profile</h1>
             <p className="text-gray-500">Update your personal details</p>
           </div>
-          <button type="button" className="flex cursor-pointer items-center gap-2 bg-white text-pink-600 border border-pink-200 px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-pink-50 transition" onClick={() => navigate("/manage-photos")}>
+          <button type="button" className="flex cursor-pointer items-center gap-2 bg-white text-pink-600 border border-pink-200 px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-pink-50 transition" onClick={() => navigate("/manage-photos2")}>
             <Camera className="w-5 h-5" />
             Manage Photos
           </button>

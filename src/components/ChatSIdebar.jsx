@@ -27,10 +27,19 @@ function ChatSidebar({ matches, selectedMatchId, onSelectMatch, currentId }) {
                 <div className="flex items-center gap-3">
                   <div className="relative">
                     <img
-                      src={match.avatar || "/default-avatar.png"}
-                      alt=""
-                      className="w-14 h-14 rounded-full object-cover"
+                      src={
+                        match.avatar
+                          ? `http://localhost:8008${match.avatar}`
+                          : "https://placehold.co/100x100?text=User"
+                      }
+                      alt={match.username || "User"}
+                      className="w-14 h-14 rounded-full object-cover border border-gray-100"
+                      onError={(e) => {
+                        e.target.src =
+                          "https://placehold.co/100x100?text=Error";
+                      }}
                     />
+                    {/* Green dot online status */}
                     <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
                   </div>
 
